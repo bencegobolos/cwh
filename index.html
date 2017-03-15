@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="src/style.css">
+    <link rel="stylesheet" type="text/css" href="lib/bootstrap.css">
+    <script src="lib/jquery-3.1.1.min.js"></script>
+    <script src="src/script.js"></script>
+    <title>Config Wizard Helper</title>
+  </head>
+  <body>
+    <div id="content" class="col-md-12">
+      <h1>Config Wizard Helper</h1>
+
+      <h2>Please select a microcontroller unit</h2>
+
+      <select name="MCU" id="MCU">
+        <option selected value="Timer0">C8051F410</option>
+        <option value="Other">Other...</option>
+      </select>
+
+      <div name="SelectApplicationC8051F410" id="SelectApplicationC8051F410">
+        <h2>Please select an application</h2>
+
+        <input type="button" name="Generate Timer Overflow" id="GenerateTimerOverFlow" value="Generate Timer Overflow">
+        <input type="button" name="Set UART Communication" id="SetUARTCommunication" value="Set UART Communication">
+        <input type="button" name="Set Pulse Width Modulation" id="SetPulseWidthModulation" value="Set Pulse Width Modulation">
+        <input type="button" name="Check SMBus Clock" id="CheckSMBusClock" value="Check SMBus Clock">
+        <input type="button" name="Check SPI Clock" id="CheckSPIClock" value="Check SPI Clock">
+        <input type="button" name="Set ADC" id="SetADC" value="Set ADC">
+      </div>
+
+      <div name="SetTimerC8051F410" id="SetTimerC8051F410">
+        <h2>Set overflow time of timer modules</h2>
+        <label for="OverflowTime">Overflow time [sec]</label>
+        <input type="text" id="OverflowTime" name="OverflowTime" placeholder="x.x sec">
+        <br>
+        <label for="GenerateTimerOverFlowFromRestrictions" id="GenerateTimerOverFlowFromRestrictionsLabel"><strong>Restrictions</strong></label>
+        <br>
+        <div name="GenerateTimerOverFlowFromRestrictions" id="GenerateTimerOverFlowFromRestrictions">
+          <label for="SYSCLK">System Clock [Hz]</label>
+          <input type="text" id="SYSCLK" name="SYSCLK" value="" placeholder="191406 Hz">
+          <br>
+          <label for="TimerModule">Timer Module</label>
+          <select id="TimerModule" name="TimerModule">
+            <!-- Not supported yet.
+            <option value="Timer0">Timer0</option>
+            <option value="Timer1">Timer1</option>
+            -->
+            <option selected value="Timer2">Timer2</option>
+            <option value="Timer3">Timer3</option>
+          </select>
+          <br>
+        </div>
+        <input type="button" id="CalculateReloadValue" name="Calculate" value="Calculate">
+
+        <div name="ResultTimerC8051F410" id="ResultTimerC8051F410">
+          <label for="ReloadValue">Reload value: </label>
+          <h3 id="ReloadValue"></h3>
+        </div>
+      </div>
+
+      <!-- Other application forms go here. -->
+
+      <div name="SetAdcC8051F410" id="SetAdcC8051F410">
+        <h2>Set Analog / Digital Converter</h2>
+
+        <form name="SetAdcForm" id="SetAdcForm" method="#" action="">
+          <label for="SampleTime">Sample Time</label>
+          <input type="text" id="SampleTime" name="SampleTime" placeholder="x.x sec">
+          <br>
+          <label for="R">Resistance</label>
+          <input type="text" id="R" name="R" placeholder="x Ohm">
+          <br>
+          <label for="C">Capacitance</label>
+          <input type="text" id="C" name="C" placeholder="x Farad">
+          <br>
+          <input type="submit" name="Calculate" value="Calculate">
+        </form>
+
+        <div name="ResultAdcC8051F410" id="ResultAdcC8051F410">
+          <!-- The submitted form's the result will go here. -->
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

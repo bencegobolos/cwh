@@ -1,0 +1,11 @@
+#SetTimerC8051F410, #ResultTimerC8051F410, #SetAdcC8051F410, #GenerateTimerOverFlowFromRestrictions{
+  display: none;
+}
+
+#GenerateTimerOverFlowFromRestrictionsLabel {
+  text-decoration: underline;
+}
+
+#GenerateTimerOverFlowFromRestrictionsLabel:hover {
+  background-color: #A5A5A5;
+}
