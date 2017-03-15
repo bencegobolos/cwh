@@ -32,16 +32,16 @@
 
       <div name="SetTimerC8051F410" id="SetTimerC8051F410">
         <h2>Set overflow time of timer modules</h2>
-        <label for="OverflowTime">Overflow time [sec]</label>
-        <input type="text" id="OverflowTime" name="OverflowTime" placeholder="x.x sec">
+        <label for="OverflowTime">Overflow time:</label>
+        <span><input type="text" id="OverflowTime" name="OverflowTime" placeholder="e.g.: 0.1"> sec</span>
         <br>
         <label for="GenerateTimerOverFlowFromRestrictions" id="GenerateTimerOverFlowFromRestrictionsLabel"><strong>Restrictions</strong></label>
         <br>
         <div name="GenerateTimerOverFlowFromRestrictions" id="GenerateTimerOverFlowFromRestrictions">
-          <label for="SYSCLK">System Clock [Hz]</label>
-          <input type="text" id="SYSCLK" name="SYSCLK" value="" placeholder="191406 Hz">
+          <label for="SYSCLK">System Clock:</label>
+          <span><input type="text" id="SYSCLK" name="SYSCLK" value="191406"> Hz</span>
           <br>
-          <label for="TimerModule">Timer Module</label>
+          <label for="TimerModule">Timer Module:</label>
           <select id="TimerModule" name="TimerModule">
             <!-- Not supported yet.
             <option value="Timer0">Timer0</option>

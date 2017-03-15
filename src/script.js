@@ -33,7 +33,7 @@ $(document).ready(function(){
 var C8051F410 = {
   id : "C8051F410",
   timer_modules : ["Timer0", "Timer1", "Timer2", "Timer3"],
-  timer_clock_sources : [1, 4, 12, 48],
+  timer_clock_sources : ["SYSCLK", "SYSCLK4", "SYSCLK12", "SYSCLK48"],
 
   availableTimerClockSources : function(timer_module) {
     switch (timer_module) {
@@ -46,6 +46,30 @@ var C8051F410 = {
       default:
         return 0;
     }
+  },
+
+  calculateTimerClockValue : function(timer_clock_source, system_clock) {
+    var n;
+
+    // Get division number from timer_clock_source.
+    switch (timer_clock_source) {
+      case this.timer_clock_sources[0]:
+        n = 1;
+        break;
+      case this.timer_clock_sources[1]:
+        n = 4;
+        break;
+      case this.timer_clock_sources[2]:
+        n = 12;
+        break;
+      case this.timer_clock_sources[3]:
+        n = 48;
+        break;
+      default:
+        return -1;
+    }
+
+    return Math.round(system_clock / n);
   }
 };
 
@@ -64,12 +88,18 @@ function executeTimerOverflow(overflow_time, system_clock, timer_module) {
   var result_timer_clock_source = 0;
 
   var timer_clock_sources = C8051F410.availableTimerClockSources(timer_module);
+  console.log("Timer module: " + timer_module);
   console.log("Timer clock sources: " + timer_clock_sources);
 
-  for (var timer_clock_source in timer_clock_sources) {
-    var timer_clock_value = system_clock / timer_clock_source;
+  // Get overflow frequency to calculate reload value.
+  var overflow_frequency = 1 / overflow_time;
+
+  for (var i = 0; i < timer_clock_sources.length; ++i) {
+    var timer_clock_source = timer_clock_sources[i];
+    console.log("Timer clock source: " + timer_clock_source);
+    var timer_clock_value = C8051F410.calculateTimerClockValue(timer_clock_source, system_clock);
     console.log("Timer clock value: " + timer_clock_value);
-    var reload_value = calculateReloadValue(overflow_time, timer_clock_value, 0);
+    var reload_value = calculateReloadValue(overflow_frequency, timer_clock_value, 0);
     if (result_reload_value > reload_value && reload_value >= 0) {
       result_reload_value = reload_value;
       result_timer_clock_source = timer_clock_source;
@@ -80,33 +110,33 @@ function executeTimerOverflow(overflow_time, system_clock, timer_module) {
   return [result_reload_value, result_timer_module, result_timer_clock_source];
 }
 
-function calculateReloadValue(overflow_time, timer_clock, mode) {
-  /* Calculate initial value for timers to result interrupts with overflow_time periodicity.
-     * overflow_time: time between interrupts.
+function calculateReloadValue(overflow_frequency, timer_clock, mode) {
+  /* Calculate initial value for timers to result interrupts with overflow_frequency periodicity.
+     * overflow_frequency: time between interrupts.
      * timer_clock: clock rate of timer module.
      * mode: select timer's mode.
        ** 0: 16 bit auto reload
        ** 1: 8 bit auto reload
        ** x: etc.
      Returns:
-     * The reload value of the register to result interrupts with overflow_time periodicity.
-     * -1, if the timer can not generate interrupts with overflow_time periodicity at timer_clock speed.
+     * The reload value of the register to result interrupts with overflow_frequency periodicity.
+     * -1, if the timer can not generate interrupts with overflow_frequency periodicity at timer_clock speed.
   */
   console.log("Calculating reload value...");
-  console.log("overflow_time: " + overflow_time + "\ntimer_clock: " + timer_clock + "\nmode: " + mode);
+  console.log("overflow_frequency: " + overflow_frequency + "\ntimer_clock: " + timer_clock + "\nmode: " + mode);
 
   var reloadValue;
 
   switch (mode) {
     case 0:
-      reloadValue = 65536 - timer_clock/overflow_time;
+      reloadValue = 65536 - timer_clock/overflow_frequency;
       break;
     case 1:
-      reloadValue = 256 - timer_clock/overflow_time;
+      reloadValue = 256 - timer_clock/overflow_frequency;
       break;
     default:
       return -1;
   }
 
-  return reloadValue;
+  return Math.round(reloadValue);
 }
