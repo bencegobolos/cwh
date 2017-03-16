@@ -34,6 +34,7 @@ var C8051F410 = {
   id : "C8051F410",
   timer_modules : ["Timer0", "Timer1", "Timer2", "Timer3"],
   timer_clock_sources : ["SYSCLK", "SYSCLK4", "SYSCLK12", "SYSCLK48"],
+  timer_modes : ["16bit", "8bit", "13bit"],
 
   availableTimerClockSources : function(timer_module) {
     switch (timer_module) {
@@ -46,6 +47,20 @@ var C8051F410 = {
       default:
         return 0;
     }
+  },
+
+  availableTimerModes : function(timer_module) {
+    switch (timer_module) {
+      case this.timer_modules[2]:
+      case this.timer_modules[3]:
+        return [this.timer_modes[0], this.timer_modes[1]];
+      default:
+        return 0;
+    }
+  },
+
+  availableTimerModules : function() {
+    return this.timer_modules;
   },
 
   calculateTimerClockValue : function(timer_clock_source, system_clock) {
@@ -75,39 +90,47 @@ var C8051F410 = {
 
 function executeTimerOverflow(overflow_time, system_clock, timer_module) {
   /* Executes the algorithm. Returns the optimal setting of MCU.
-     Returns: [reload_value, timer_module, timer_clock_source]
+     Returns: [reload_value, timer_module, timer_clock_source, timer_mode]
   */
 
   // Optional parameters.
-  if (typeof system_clock === "undefined") system_clock = 191406;
-  if (typeof timer_module === "undefined") timer_module = "Timer2";
+  if (system_clock == "") system_clock = 191406;
+  if (timer_module == "") timer_module = "Timer2";
 
   // Initialize result values.
   var result_reload_value = 999999;
   var result_timer_module = "";
   var result_timer_clock_source = 0;
+  var result_timer_mode = 0;
+
+  // Get overflow frequency to calculate reload value.
+  var overflow_frequency = 1 / overflow_time;
 
   var timer_clock_sources = C8051F410.availableTimerClockSources(timer_module);
   console.log("Timer module: " + timer_module);
   console.log("Timer clock sources: " + timer_clock_sources);
 
-  // Get overflow frequency to calculate reload value.
-  var overflow_frequency = 1 / overflow_time;
+  var timer_modes = C8051F410.availableTimerModes(timer_module);
 
   for (var i = 0; i < timer_clock_sources.length; ++i) {
     var timer_clock_source = timer_clock_sources[i];
     console.log("Timer clock source: " + timer_clock_source);
     var timer_clock_value = C8051F410.calculateTimerClockValue(timer_clock_source, system_clock);
     console.log("Timer clock value: " + timer_clock_value);
-    var reload_value = calculateReloadValue(overflow_frequency, timer_clock_value, 0);
-    if (result_reload_value > reload_value && reload_value >= 0) {
-      result_reload_value = reload_value;
-      result_timer_clock_source = timer_clock_source;
-      result_timer_module = timer_module;
+    for (var j = 0; j < timer_modes.length; ++j){
+      var timer_mode = timer_modes[j];
+      console.log("Timer mode: " + timer_mode);
+      var reload_value = calculateReloadValue(overflow_frequency, timer_clock_value, timer_mode);
+      if (result_reload_value > reload_value && reload_value >= 0) {
+        result_reload_value = reload_value;
+        result_timer_clock_source = timer_clock_source;
+        result_timer_module = timer_module;
+        result_timer_mode = timer_mode;
+      }
     }
   }
 
-  return [result_reload_value, result_timer_module, result_timer_clock_source];
+  return [result_reload_value, result_timer_module, result_timer_clock_source, result_timer_mode];
 }
 
 function calculateReloadValue(overflow_frequency, timer_clock, mode) {
@@ -128,11 +151,14 @@ function calculateReloadValue(overflow_frequency, timer_clock, mode) {
   var reloadValue;
 
   switch (mode) {
-    case 0:
+    case "16bit":
       reloadValue = 65536 - timer_clock/overflow_frequency;
       break;
-    case 1:
+    case "8bit":
       reloadValue = 256 - timer_clock/overflow_frequency;
+      break;
+    case "13bit":
+      reloadValue = 8192 - timer_clock/overflow_frequency;
       break;
     default:
       return -1;
