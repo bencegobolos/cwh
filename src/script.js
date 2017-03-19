@@ -111,7 +111,7 @@ function executeTimerOverflow(mcu_name, overflow_frequency, sysclk, timer_module
   }
 
   // Initialize result values.
-  var result_reload_value_badness = Number.MAX_VALUE;
+  var result_reload_value_goodness = Number.NEGATIVE_INFINITY;
   var result_reload_value, result_system_clock, result_timer_module, result_timer_clock_source, result_timer_mode;
 
   for (var l = 0; l < system_clocks.length; ++l) {
@@ -129,19 +129,19 @@ function executeTimerOverflow(mcu_name, overflow_frequency, sysclk, timer_module
           /* Strategy to save the best setting. Another strategies could go here. This should
              probably go to a function with a parameter. E.g.: optimizeTimer(strategy_type)
              The system_clock will iterate from min to max. If there is a solution with the same
-             "badness", then the bigger system_clock will be saved.
+             "goodness", then the bigger system_clock will be saved.
              Examples:
-             * if (system_clock < result_sysclk && reload_value[1] != Number.MAX_VALUE)
+             * if (system_clock < result_sysclk && reload_value[1] != Number.NEGATIVE_INFINITY)
                will save the result with the smallest system clock possible.
              * if (...)
                will save something else.
            */
-          if (result_reload_value_badness >= reload_value[1]) {
+          if (result_reload_value_goodness <= reload_value[1]) {
             /* Save the result in these variables.
              This result have too much variable, there must be a better way to save
              everything in just a few lines (one would be the best).
              */
-            result_reload_value_badness = reload_value[1];
+            result_reload_value_goodness = reload_value[1];
             result_reload_value = reload_value[0];
             result_system_clock = system_clock;
             result_timer_clock_source = timer_clock_source;
@@ -164,33 +164,33 @@ function calculateReloadValue(overflow_frequency, timer_clock, mode) {
        ** 0: 16 bit auto reload
        ** 1: 8 bit auto reload
        ** x: etc.
-     Returns: [reloadValue, badness]
+     Returns: [reloadValue, goodness]
      * reloadValue
      ** The reload value of the register to result interrupts with overflow_frequency periodicity.
      ** -1, if the timer can not generate interrupts with overflow_frequency at timer_clock speed.
-     * badness
-     ** A number between 0 and 1 depending on how much step will it take to overflow the timer.
-     ** Number.MAX_VALUE, if the timer can not generate interrupts with overflow_frequency at timer_clock speed.
+     * goodness
+     ** A number which value depends on how much step will it take to overflow the timer.
+     ** Number.NEGATIVE_INFINITY, if the timer can not generate interrupts with overflow_frequency at timer_clock speed.
   */
   var reloadValue;
-  var badness;
+  var goodness;
 
   switch (mode) {
     case autoReload16Bit:
       reloadValue = Math.round(65536 - timer_clock/overflow_frequency);
-      if (reloadValue >= 65536 || reloadValue < 0) return [-1, Number.MAX_VALUE];
-      badness = reloadValue / 65536;
+      if (reloadValue >= 65536 || reloadValue < 0) return [-1, Number.NEGATIVE_INFINITY];
+      goodness = 65536 - reloadValue;
       break;
     case autoReload8Bit:
       reloadValue = Math.round(256 - timer_clock/overflow_frequency);
-      if (reloadValue >= 256 || reloadValue < 0) return [-1, Number.MAX_VALUE];
-      badness = reloadValue / 256;
+      if (reloadValue >= 256 || reloadValue < 0) return [-1, Number.NEGATIVE_INFINITY];
+      goodness = 256 - reloadValue;
       break;
     default:
-      return [-1, Number.MAX_VALUE];
+      return [-1, Number.NEGATIVE_INFINITY];
   }
 
-  return [reloadValue, badness];
+  return [reloadValue, goodness];
 }
 
 // #################################################
