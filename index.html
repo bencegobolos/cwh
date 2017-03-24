@@ -64,10 +64,18 @@
         <input type="button" id="CalculateReloadValue" name="Calculate" value="Calculate">
 
         <div name="ResultTimerC8051F410" id="ResultTimerC8051F410">
-          <label for="ReloadValue">Reload value : hex ( dec ) </label>
-          <h3 id="ReloadValue"></h3>
-          <label for="Settings">Settings [system_clock, timer_module, timer_clock_source, timer_mode]</label>
-          <h3 id="Settings"></h3>
+          <div id="Settings">
+            <label for="ReloadValue">Reload value : hex ( dec ) </label>
+	    <p id="ReloadValue"></p>
+            <label for="SystemClock">System clock: </label>
+	    <p id="SystemClock"></p>
+            <label for="Timer">Timer module: </label>
+	    <p id="Timer"></p>
+            <label for="TimerClockSource">Timer clock source: </label>
+	    <p id="TimerClockSource"></p>
+            <label for="TimerMode">Timer mode: </label>
+	    <p id="TimerMode"></p>
+	  </div>
         </div>
       </div>
 

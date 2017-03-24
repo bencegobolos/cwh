@@ -25,10 +25,16 @@ $(document).ready(function(){
     var result = executeTimerOverflow(mcu, overflow_frequency, sysclk, timer_module);
     if (result[0] < 0) {
       document.getElementById("ReloadValue").innerHTML = "No result.";
-      document.getElementById("Settings").innerHTML = " -,-,-,- ";
+      document.getElementById("SystemClock").innerHTML = "-";
+      document.getElementById("Timer").innerHTML = "-";
+      document.getElementById("TimerClockSource").innerHTML = "-";
+      document.getElementById("TimerMode").innerHTML = "-";
     } else {
-      document.getElementById("ReloadValue").innerHTML = decimalToHex(result[0], 4) + " ( " + result[0] + " )";
-      document.getElementById("Settings").innerHTML = result.slice(1, result.length);
+      document.getElementById("ReloadValue").innerHTML = "0x" + decimalToHex(result[0], 4) + " ( " + result[0] + " )";
+      document.getElementById("SystemClock").innerHTML = result[1];
+      document.getElementById("Timer").innerHTML = result[2];
+      document.getElementById("TimerClockSource").innerHTML = result[3];
+      document.getElementById("TimerMode").innerHTML = result[4];
     }
 
     $("#ResultTimerC8051F410").show(500);
