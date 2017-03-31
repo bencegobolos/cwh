@@ -16,6 +16,30 @@ $(document).ready(function(){
     $("#GenerateTimerOverFlowFromRestrictions").toggle(500);
   });
 
+  /* This handles the external system clock value option (select or other combo box)
+  *  The solution was found here:
+  *  http://stackoverflow.com/questions/5650457/html-select-form-with-option-to-enter-custom-value
+  *  */
+  var initialText = $('.editable').val();
+  $('.editOption').val(initialText);
+
+  $('#SYSCLK').change(function(){
+    var selected = $('option:selected', this).attr('class');
+    var optionText = $('.editable').text();
+
+    if(selected == "editable"){
+      $('.editOption').show();
+      $('.editOption').keyup(function(){
+        var editText = $('.editOption').val();
+        $('.editable').val(editText);
+        $('.editable').html(editText);
+      });
+
+    }else{
+      $('.editOption').hide();
+    }
+  });
+
   $("#CalculateReloadValue").click(function(){
     var mcu = document.getElementById("MCU").value;
     var overflow_frequency = document.getElementById("OverflowFrequency").value;
