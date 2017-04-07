@@ -48,12 +48,14 @@ $(document).ready(function(){
 
     var result = executeTimerOverflow(mcu, overflow_frequency, sysclk, timer_module);
     if (result[0] < 0) {
+      $("#InterruptCode").show(500);
       document.getElementById("ReloadValue").innerHTML = "No result.";
       document.getElementById("SystemClock").innerHTML = "-";
       document.getElementById("Timer").innerHTML = "-";
       document.getElementById("TimerClockSource").innerHTML = "-";
       document.getElementById("TimerMode").innerHTML = "-";
     } else {
+      $("#InterruptCode").hide(100);
       document.getElementById("ReloadValue").innerHTML = "0x" + decimalToHex(result[0], 4) + " ( " + result[0] + " )";
       document.getElementById("SystemClock").innerHTML = result[1];
       document.getElementById("Timer").innerHTML = result[2];

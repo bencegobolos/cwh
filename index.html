@@ -68,16 +68,30 @@
         <div name="ResultTimerC8051F410" id="ResultTimerC8051F410">
           <div id="Settings">
             <label for="ReloadValue">Reload value : hex ( dec ) </label>
-	    <p id="ReloadValue"></p>
+	        <p id="ReloadValue"></p>
             <label for="SystemClock">System clock: </label>
-	    <p id="SystemClock"></p>
+	        <p id="SystemClock"></p>
             <label for="Timer">Timer module: </label>
-	    <p id="Timer"></p>
+	        <p id="Timer"></p>
             <label for="TimerClockSource">Timer clock source: </label>
-	    <p id="TimerClockSource"></p>
+	        <p id="TimerClockSource"></p>
             <label for="TimerMode">Timer mode: </label>
-	    <p id="TimerMode"></p>
-	  </div>
+	        <p id="TimerMode"></p>
+	      </div>
+          <div id="InterruptCode">
+            <p>Could not solve the issue with a single timer interrupt
+              but it can be solved by software support.</p>
+            <pre><code class="code">
+void intHandler(void) __interrupt <code id="TimerInterrupt">"int_number"</code> {
+    <code id="TimerFlag">"timer_flag_id"</code> = 0;
+    static int divider = <code id="TimerInterruptDivider">"divisor"</code>;
+    divider--;
+    if (!divider) {
+        // Paste your code here.
+    }
+}<br/>
+            </code></pre>
+          </div>
         </div>
       </div>
 

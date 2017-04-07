@@ -1,4 +1,4 @@
-#SetTimerC8051F410, #ResultTimerC8051F410, #SetAdcC8051F410, #GenerateTimerOverFlowFromRestrictions{
+#SetTimerC8051F410, #ResultTimerC8051F410, #SetAdcC8051F410, #GenerateTimerOverFlowFromRestrictions, #InterruptCode{
   display: none;
 }
 
