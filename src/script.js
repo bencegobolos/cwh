@@ -279,3 +279,15 @@ function getMcu(mcu_list, mcu_name) {
   // No mcu has been found with the name: mcu_name.
   return undefined;
 }
+
+function getMinimalSystemClockFrequency(mcu) {
+  return Math.min.apply(null, mcu.system_clocks);
+}
+
+function getMaximalSystemClockFrequency(mcu) {
+  return Math.max.apply(null, mcu.system_clocks);
+}
+
+function getMinimalTimerClockFrequency(mcu) {
+  var sysclk = getMinimalSystemClockFrequency(mcu)
+}
