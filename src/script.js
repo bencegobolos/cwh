@@ -47,20 +47,20 @@ $(document).ready(function(){
     var timer_module = document.getElementById("TimerModule").value;
 
     var result = executeTimerOverflow(mcu, overflow_frequency, sysclk, timer_module);
-    if (result[0] < 0) {
+
+    document.getElementById("ReloadValue").innerHTML = "0x" + decimalToHex(result[0], 4) + " ( " + result[0] + " )";
+    document.getElementById("SystemClock").innerHTML = result[1];
+    document.getElementById("Timer").innerHTML = result[2].name;
+    document.getElementById("TimerClockSource").innerHTML = result[3];
+    document.getElementById("TimerMode").innerHTML = result[4];
+    document.getElementById("TimerInterrupt").innerHTML = getTimerInterruptName(result[2]);
+    document.getElementById("TimerFlag").innerHTML = getTimerInterruptFlag(result[2]);
+    document.getElementById("TimerInterruptDivider").innerHTML = result[5];
+
+    if (result[5] > 1) {
       $("#InterruptCode").show(500);
-      document.getElementById("ReloadValue").innerHTML = "No result.";
-      document.getElementById("SystemClock").innerHTML = "-";
-      document.getElementById("Timer").innerHTML = "-";
-      document.getElementById("TimerClockSource").innerHTML = "-";
-      document.getElementById("TimerMode").innerHTML = "-";
     } else {
       $("#InterruptCode").hide(100);
-      document.getElementById("ReloadValue").innerHTML = "0x" + decimalToHex(result[0], 4) + " ( " + result[0] + " )";
-      document.getElementById("SystemClock").innerHTML = result[1];
-      document.getElementById("Timer").innerHTML = result[2];
-      document.getElementById("TimerClockSource").innerHTML = result[3];
-      document.getElementById("TimerMode").innerHTML = result[4];
     }
 
     $("#ResultTimerC8051F410").show(500);
@@ -82,25 +82,33 @@ var autoReload16Bit = "autoReload16Bit";
 var Timer0 = {
   name : "Timer0",
   clock_sources : [SYSCLK4, SYSCLK12, SYSCLK48],
-  modes : [autoReload8Bit]
+  modes : [autoReload8Bit],
+  interrupt_name : "INT_TIMER0",
+  interrupt_flag : "TF0"
 };
 
 var Timer1 = {
   name : "Timer1",
   clock_sources : [SYSCLK4, SYSCLK12, SYSCLK48],
-  modes : [autoReload8Bit]
+  modes : [autoReload8Bit],
+  interrupt_name : "INT_TIMER1",
+  interrupt_flag : "TF1"
 };
 
 var Timer2 = {
   name : "Timer2",
   clock_sources : [SYSCLK, SYSCLK12],
-  modes : [autoReload16Bit, autoReload8Bit]
+  modes : [autoReload16Bit, autoReload8Bit],
+  interrupt_name : "INT_TIMER2",
+  interrupt_flag : "TF2"
 };
 
 var Timer3 = {
   name : "Timer3",
   clock_sources : [SYSCLK, SYSCLK12],
-  modes : [autoReload16Bit, autoReload8Bit]
+  modes : [autoReload16Bit, autoReload8Bit],
+  interrupt_name : "INT_TIMER3",
+  interrupt_flag : "TF3"
 };
 
 /* Object representation of C8051F410. */
@@ -144,10 +152,11 @@ function executeTimerOverflow(mcu_name, overflow_frequency, sysclk, timer_module
 
   // Initialize result values.
   var result_reload_value_goodness = Number.NEGATIVE_INFINITY;
-  var result_reload_value, result_system_clock, result_timer_module, result_timer_clock_source, result_timer_mode;
+  var result_reload_value, result_system_clock, result_timer_module, result_timer_clock_source, result_timer_mode, result_divisor;
 
+  for (var divisor = 1; divisor < Number.POSITIVE_INFINITY; divisor++) {
   for (var l = 0; l < system_clocks.length; ++l) {
-    var system_clock = system_clocks[l];
+    var system_clock = system_clocks[l]/divisor;
     for (var k = 0; k < timer_modules.length; ++k) {
       var timer_module = timer_modules[k];
       var timer_clock_sources = timer_module.clock_sources;
@@ -175,17 +184,21 @@ function executeTimerOverflow(mcu_name, overflow_frequency, sysclk, timer_module
              */
             result_reload_value_goodness = reload_value[1];
             result_reload_value = reload_value[0];
-            result_system_clock = system_clock;
+            result_system_clock = system_clock * divisor;
             result_timer_clock_source = timer_clock_source;
-            result_timer_module = timer_module.name;
+            result_timer_module = timer_module;
             result_timer_mode = timer_mode;
+            result_divisor = divisor;
           }
         }
       }
     }
   }
+  if (result_reload_value_goodness != Number.NEGATIVE_INFINITY)
+    break;
+  }
 
-  return [result_reload_value, result_system_clock, result_timer_module, result_timer_clock_source, result_timer_mode];
+  return [result_reload_value, result_system_clock, result_timer_module, result_timer_clock_source, result_timer_mode, result_divisor];
 }
 
 function calculateReloadValue(overflow_frequency, timer_clock, mode) {
@@ -267,6 +280,18 @@ function getTimerModule(mcu, timer_module_name) {
   }
   // No timer module has been found with the name: timer_module_name.
   return undefined;
+}
+
+function getTimerName(timer_module) {
+  return timer_module.name;
+}
+
+function getTimerInterruptName(timer_module) {
+  return timer_module.interrupt_name;
+}
+
+function getTimerInterruptFlag(timer_module) {
+  return timer_module.interrupt_flag;
 }
 
 function getMcu(mcu_list, mcu_name) {
