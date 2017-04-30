@@ -47,20 +47,30 @@ $(document).ready(function(){
     var timer_module = document.getElementById("TimerModule").value;
 
     var result = executeTimerOverflow(mcu, overflow_frequency, sysclk, timer_module);
-    if (result[0] < 0) {
-      $("#InterruptCode").show(500);
+
+    if (result.result_reload_value < 0 || result.result_reload_value == undefined) {
       document.getElementById("ReloadValue").innerHTML = "No result.";
       document.getElementById("SystemClock").innerHTML = "-";
       document.getElementById("Timer").innerHTML = "-";
       document.getElementById("TimerClockSource").innerHTML = "-";
       document.getElementById("TimerMode").innerHTML = "-";
-    } else {
       $("#InterruptCode").hide(100);
-      document.getElementById("ReloadValue").innerHTML = "0x" + decimalToHex(result[0], 4) + " ( " + result[0] + " )";
-      document.getElementById("SystemClock").innerHTML = result[1];
-      document.getElementById("Timer").innerHTML = result[2];
-      document.getElementById("TimerClockSource").innerHTML = result[3];
-      document.getElementById("TimerMode").innerHTML = result[4];
+    } else {
+      document.getElementById("ReloadValue").innerHTML = "0x" + decimalToHex(result.result_reload_value, 4) + " ( " + result.result_reload_value + " )";
+      document.getElementById("SystemClock").innerHTML = result.system_clock;
+      document.getElementById("Timer").innerHTML = result.timer_module.name;
+      document.getElementById("TimerClockSource").innerHTML = result.timer_clock_source;
+      document.getElementById("TimerMode").innerHTML = result.timer_mode;
+      document.getElementById("TimerInterrupt").innerHTML = result.timer_module.interrupt_name;
+      document.getElementById("TimerFlagDelete").innerHTML = result.timer_module.interrupt_flag_delete;
+      document.getElementById("TimerInterruptDivisorInit").innerHTML = result.result_divisor;
+      document.getElementById("TimerInterruptDivisorReset").innerHTML = result.result_divisor;
+
+      if (result.result_divisor > 1) {
+        $("#InterruptCode").show(500);
+      } else {
+        $("#InterruptCode").hide(100);
+      }
     }
 
     $("#ResultTimerC8051F410").show(500);
@@ -82,25 +92,33 @@ var autoReload16Bit = "autoReload16Bit";
 var Timer0 = {
   name : "Timer0",
   clock_sources : [SYSCLK4, SYSCLK12, SYSCLK48],
-  modes : [autoReload8Bit]
+  modes : [autoReload8Bit],
+  interrupt_name : "INT_TIMER0",
+  interrupt_flag_delete : "TF0 = 0;"
 };
 
 var Timer1 = {
   name : "Timer1",
   clock_sources : [SYSCLK4, SYSCLK12, SYSCLK48],
-  modes : [autoReload8Bit]
+  modes : [autoReload8Bit],
+  interrupt_name : "INT_TIMER1",
+  interrupt_flag_delete : "TF1 = 0;"
 };
 
 var Timer2 = {
   name : "Timer2",
   clock_sources : [SYSCLK, SYSCLK12],
-  modes : [autoReload16Bit, autoReload8Bit]
+  modes : [autoReload16Bit, autoReload8Bit],
+  interrupt_name : "INT_TIMER2",
+  interrupt_flag_delete : "TF2 = 0;"
 };
 
 var Timer3 = {
   name : "Timer3",
   clock_sources : [SYSCLK, SYSCLK12],
-  modes : [autoReload16Bit, autoReload8Bit]
+  modes : [autoReload16Bit, autoReload8Bit],
+  interrupt_name : "INT_TIMER3",
+  interrupt_flag_delete : "TMR3CN &= 7F;"
 };
 
 /* Object representation of C8051F410. */
@@ -142,9 +160,8 @@ function executeTimerOverflow(mcu_name, overflow_frequency, sysclk, timer_module
     timer_modules = [getTimerModule(mcu, timer_module_name)];
   }
 
-  // Initialize result values.
-  var result_reload_value_goodness = Number.NEGATIVE_INFINITY;
-  var result_reload_value, result_system_clock, result_timer_module, result_timer_clock_source, result_timer_mode;
+  // Initialize results array.
+  var results = [];
 
   for (var l = 0; l < system_clocks.length; ++l) {
     var system_clock = system_clocks[l];
@@ -157,35 +174,25 @@ function executeTimerOverflow(mcu_name, overflow_frequency, sysclk, timer_module
         var timer_clock_value = calculateTimerClockValue(timer_clock_source, system_clock);
         for (var j = 0; j < timer_modes.length; ++j) {
           var timer_mode = timer_modes[j];
-          var reload_value = calculateReloadValue(overflow_frequency, timer_clock_value, timer_mode);
-          /* Strategy to save the best setting. Another strategies could go here. This should
-             probably go to a function with a parameter. E.g.: optimizeTimer(strategy_type)
-             The system_clock will iterate from min to max. If there is a solution with the same
-             "goodness", then the bigger system_clock will be saved.
-             Examples:
-             * if (system_clock < result_sysclk && reload_value[1] != Number.NEGATIVE_INFINITY)
-               will save the result with the smallest system clock possible.
-             * if (...)
-               will save something else.
-           */
-          if (result_reload_value_goodness <= reload_value[1]) {
-            /* Save the result in these variables.
-             This result have too much variable, there must be a better way to save
-             everything in just a few lines (one would be the best).
-             */
-            result_reload_value_goodness = reload_value[1];
-            result_reload_value = reload_value[0];
-            result_system_clock = system_clock;
-            result_timer_clock_source = timer_clock_source;
-            result_timer_module = timer_module.name;
-            result_timer_mode = timer_mode;
+          var result = calculateReloadValue(overflow_frequency, timer_clock_value, timer_mode);
+          // Strategy to save the result. Another strategies could go here.
+          if (result.reload_value >= 0 && result.divisor < 256) {
+            results.push({
+              "system_clock" : system_clock,
+              "timer_module" : timer_module,
+              "timer_clock_source" : timer_clock_source,
+              "timer_mode" : timer_mode,
+              "result_reload_value" : result.reload_value,
+              "result_goodness" : result.goodness,
+              "result_divisor" : result.divisor
+            });
           }
         }
       }
     }
   }
-
-  return [result_reload_value, result_system_clock, result_timer_module, result_timer_clock_source, result_timer_mode];
+  var result_settings = _.max(_.first(_.toArray(_.groupBy(results, "result_divisor"))), "result_goodness");
+  return result_settings;
 }
 
 function calculateReloadValue(overflow_frequency, timer_clock, mode) {
@@ -196,33 +203,63 @@ function calculateReloadValue(overflow_frequency, timer_clock, mode) {
        ** 0: 16 bit auto reload
        ** 1: 8 bit auto reload
        ** x: etc.
-     Returns: [reloadValue, goodness]
+     Returns: [reloadValue, goodness, divisor]
      * reloadValue
      ** The reload value of the register to result interrupts with overflow_frequency periodicity.
      ** -1, if the timer can not generate interrupts with overflow_frequency at timer_clock speed.
      * goodness
      ** A number which value depends on how much step will it take to overflow the timer.
      ** Number.NEGATIVE_INFINITY, if the timer can not generate interrupts with overflow_frequency at timer_clock speed.
+     * divisor
+     ** A number which divides the timer_clock in order to support overflow_frequency code execution via software-aid.
+     ** 1 if the overflow_frequency can be guaranteed without software-aid, positive integer otherwise.
   */
   var reloadValue;
+  var divisor;
   var goodness;
+  var minimal_frequency;
+
+  // Variable that stores a result which represents that the reload value can not be calculated or is not valid.
+  var no_result = {"reload_value" : -1, "goodness" : Number.NEGATIVE_INFINITY, "divisor" : Number.POSITIVE_INFINITY};
+
+  // Overflow frequency is bigger than the maximal solvable frequency (timer_clock).
+  if (overflow_frequency > timer_clock) return no_result;
+
+  // Get minimal solvable frequency.
+  switch (mode) {
+    case autoReload16Bit:
+      minimal_frequency = timer_clock / 65536;
+      break;
+    case autoReload8Bit:
+      minimal_frequency = timer_clock / 256;
+      break;
+  }
+
+  // Get timer_clock divisor.
+  // 1: if the overflow_frequency can be guaranteed without software-aid
+  // Positive integer: otherwise (software-aid is needed)
+  if (overflow_frequency < minimal_frequency) {
+    divisor = Math.ceil(minimal_frequency / overflow_frequency);
+  } else {
+    divisor = 1;
+  }
 
   switch (mode) {
     case autoReload16Bit:
-      reloadValue = Math.round(65536 - timer_clock/overflow_frequency);
-      if (reloadValue >= 65536 || reloadValue < 0) return [-1, Number.NEGATIVE_INFINITY];
+      reloadValue = Math.round(65536 - (timer_clock/divisor)/overflow_frequency);
+      if (reloadValue >= 65536 || reloadValue < 0) return no_result;
       goodness = 65536 - reloadValue;
       break;
     case autoReload8Bit:
-      reloadValue = Math.round(256 - timer_clock/overflow_frequency);
-      if (reloadValue >= 256 || reloadValue < 0) return [-1, Number.NEGATIVE_INFINITY];
+      reloadValue = Math.round(256 - (timer_clock/divisor)/overflow_frequency);
+      if (reloadValue >= 256 || reloadValue < 0) return no_result;
       goodness = 256 - reloadValue;
       break;
     default:
-      return [-1, Number.NEGATIVE_INFINITY];
+      return no_result;
   }
 
-  return [reloadValue, goodness];
+  return {"reload_value" : reloadValue, "goodness" : goodness, "divisor" : divisor};
 }
 
 // #################################################
@@ -278,16 +315,4 @@ function getMcu(mcu_list, mcu_name) {
   }
   // No mcu has been found with the name: mcu_name.
   return undefined;
-}
-
-function getMinimalSystemClockFrequency(mcu) {
-  return Math.min.apply(null, mcu.system_clocks);
-}
-
-function getMaximalSystemClockFrequency(mcu) {
-  return Math.max.apply(null, mcu.system_clocks);
-}
-
-function getMinimalTimerClockFrequency(mcu) {
-  var sysclk = getMinimalSystemClockFrequency(mcu)
 }

@@ -5,6 +5,7 @@
     <link rel="stylesheet" type="text/css" href="src/style.css">
     <link rel="stylesheet" type="text/css" href="lib/bootstrap.css">
     <script src="lib/jquery-3.1.1.min.js"></script>
+    <script src="lib/underscore-min.js"></script>
     <script src="src/script.js"></script>
     <title>Config Wizard Helper</title>
   </head>
@@ -83,13 +84,15 @@
               but it can be solved by software support.</p>
             <pre><code class="code">
 void intHandler(void) __interrupt <code id="TimerInterrupt">"int_number"</code> {
-    <code id="TimerFlag">"timer_flag_id"</code> = 0;
-    static int divider = <code id="TimerInterruptDivider">"divisor"</code>;
+    static unsigned char divisor = <code id="TimerInterruptDivisorInit">"divisor"</code>;
+    <code id="TimerFlagDelete">"timer_flag_id = 0;"</code>
     divider--;
     if (!divider) {
+        divisor = <code id="TimerInterruptDivisorReset">"divisor"</code>;
+
         // Paste your code here.
+
     }
-}<br/>
             </code></pre>
           </div>
         </div>
