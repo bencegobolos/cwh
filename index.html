@@ -86,8 +86,8 @@
 void intHandler(void) __interrupt <code id="TimerInterrupt">"int_number"</code> {
     static unsigned char divisor = <code id="TimerInterruptDivisorInit">"divisor"</code>;
     <code id="TimerFlagDelete">"timer_flag_id = 0;"</code>
-    divider--;
-    if (!divider) {
+    divisor--;
+    if (!divisor) {
         divisor = <code id="TimerInterruptDivisorReset">"divisor"</code>;
 
         // Paste your code here.
