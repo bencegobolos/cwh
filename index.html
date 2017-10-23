@@ -25,10 +25,12 @@
 
         <input type="button" name="Generate Timer Overflow" id="GenerateTimerOverFlow" value="Generate Timer Overflow">
         <input type="button" name="Set UART Communication" id="SetUARTCommunication" value="Set UART Communication">
-        <input type="button" name="Set Pulse Width Modulation" id="SetPulseWidthModulation" value="Set Pulse Width Modulation">
-        <input type="button" name="Check SMBus Clock" id="CheckSMBusClock" value="Check SMBus Clock">
-        <input type="button" name="Check SPI Clock" id="CheckSPIClock" value="Check SPI Clock">
         <input type="button" name="Set ADC" id="SetADC" value="Set ADC">
+      </div>
+
+      <div name="ManageUsagesDiv" id="ManageUsagesDiv">
+          <input type="button" name="DeleteTimer1Usage" id="DeleteTimer1Usage" value="Delete Timer 1 Usage">
+          <p id="DeleteTimer1UsageFeedback"></p>
       </div>
 
       <div name="SetTimerC8051F410" id="SetTimerC8051F410">
@@ -93,31 +95,108 @@ void intHandler(void) __interrupt <code id="TimerInterrupt">"int_number"</code> 
         // Paste your code here.
 
     }
+}
             </code></pre>
           </div>
+          <input type="button" id="SetTimerModule" name="Set Timer Module" value="Set Timer Module">
+          <p id="SetTimerModuleFeedback"></p>
         </div>
       </div>
 
       <!-- Other application forms go here. -->
 
+
+      <div name="SetUARTC8051F410" id="SetUARTC8051F410">
+        <h2>Set UART configuration</h2>
+
+        <form name="SetUARTForm" id="SetUARTForm" method="#" action="">
+          <label for="bitPerSec">Bit / sec:</label>
+          <span><input type="number" min="0" id="bitPerSec" name="bitPerSec" placeholder="e.g.: 1"> bit / sec</span>
+          <br>
+          <label for="SetUARTFromRestrictions" id="SetUARTFromRestrictionsLabel"><strong>Restrictions</strong></label>
+          <br>
+          <div name="SetUARTFromRestrictions" id="SetUARTFromRestrictions">
+            <label for="UARTSYSCLK">System Clock:</label>
+            <select id="UARTSYSCLK" name="UARTSYSCLK">
+              <option selected value=-1>Please select a system clock</option>
+              <option value=191406>191406 Hz</option>
+              <option value=382813>382813 Hz</option>
+              <option value=765625>765625 Hz</option>
+              <option value=1531250>1531250 Hz</option>
+              <option value=3062500>3062500 Hz</option>
+              <option value=6125000>6125000 Hz</option>
+              <option value=12250000>12250000 Hz</option>
+              <option value=24500000>24500000 Hz</option>
+              <option class="editable" value=0>External clock value</option>
+            </select>
+            <span><input class="editOption" style="display:none;" /></span>
+            <br>
+            <label for="UARTAccuracy">Accuracy:</label>
+            <span><input type="number" min="0" id="UARTAccuracy" value=2 name="UARTAccuracy" placeholder="e.g.: 1"> %</span>
+            <br>
+          </div>
+          <input type="button" id="SetUART" name="SetUART" value="Set UART">
+        </form>
+        <p id="UARTIsTimer1Used"></p>
+        <div name="ResultUARTC8051F410" id="ResultUARTC8051F410">
+          <div id="UARTSettings">
+            <label for="UARTReloadValue">Reload value : hex ( dec ) </label>
+            <p id="UARTReloadValue"></p>
+            <label for="UARTSystemClock">System clock: </label>
+            <p id="UARTSystemClock"></p>
+            <label for="UARTTimer">Timer module: </label>
+            <p id="UARTTimer"></p>
+            <label for="UARTTimerClockSource">Timer clock source: </label>
+            <p id="UARTTimerClockSource"></p>
+            <label for="UARTTimerMode">Timer mode: </label>
+            <p id="UARTTimerMode"></p>
+	    <label for="UARTResultBitPerSec">Result Bit per sec: </label>
+	    <p id="UARTResultBitPerSec"></p>
+            <label for="UARTResultAccuracy">Accuracy: </label>
+            <p id="UARTResultAccuracy"></p>
+          </div>
+        </div>
+      </div>
+
       <div name="SetAdcC8051F410" id="SetAdcC8051F410">
         <h2>Set Analog / Digital Converter</h2>
 
         <form name="SetAdcForm" id="SetAdcForm" method="#" action="">
-          <label for="SampleTime">Sample Time</label>
-          <input type="text" id="SampleTime" name="SampleTime" placeholder="x.x sec">
-          <br>
           <label for="R">Resistance</label>
-          <input type="text" id="R" name="R" placeholder="x Ohm">
+          <input type="number" min="0" id="R" name="R" placeholder="x Ohm">
           <br>
-          <label for="C">Capacitance</label>
-          <input type="text" id="C" name="C" placeholder="x Farad">
+          <label for="SetADCFromRestrictions" id="SetADCFromRestrictionsLabel"><strong>Restrictions</strong></label>
+          <div name="SetADCFromRestrictions" id="SetADCFromRestrictions">
+            <label for="ADCSYSCLK">System Clock:</label>
+            <select id="ADCSYSCLK" name="ADCSYSCLK">
+              <option selected value=-1>Please select a system clock</option>
+              <option value=191406>191406 Hz</option>
+              <option value=382813>382813 Hz</option>
+              <option value=765625>765625 Hz</option>
+              <option value=1531250>1531250 Hz</option>
+              <option value=3062500>3062500 Hz</option>
+              <option value=6125000>6125000 Hz</option>
+              <option value=12250000>12250000 Hz</option>
+              <option value=24500000>24500000 Hz</option>
+              <option class="editable" value=0>External clock value</option>
+            </select>
+            <span><input class="editOption" style="display:none;" /></span>
+          </div>
           <br>
-          <input type="submit" name="Calculate" value="Calculate">
+          <input type="button" name="SetADC" value="Set ADC" id="CalculateADC">
         </form>
 
         <div name="ResultAdcC8051F410" id="ResultAdcC8051F410">
-          <!-- The submitted form's the result will go here. -->
+          <label for="minimumTrackingTime">Minimum Tracking Time: </label>
+          <p id="minimumTrackingTime"></p>
+          <label for="resultTrackingTime">Result Tracking Time: </label>
+          <p id="resultTrackingTime"></p>
+          <label for="resultADCSYSCLK">System clock: </label>
+          <p id="resultADCSYSCLK"></p>
+          <label for="AD0SC">System clock divisor to set SAR clock: </label>
+          <p id="AD0SC"></p>
+          <label for="resultSARMultiplier">SAR multiplier (for setting "Post tracking time"): </label>
+          <p id="resultSARMultiplier"></p>
         </div>
       </div>
     </div>
