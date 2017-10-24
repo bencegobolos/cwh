@@ -3,9 +3,11 @@
   <head>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="src/style.css">
-    <link rel="stylesheet" type="text/css" href="lib/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="lib/bootstrap/css/bootstrap.css">
     <script src="lib/jquery-3.1.1.min.js"></script>
     <script src="lib/underscore-min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="src/constants.js"></script>
     <script src="src/mcus/C8051F410.js"></script>
     <script src="src/mcus/mcus.js"></script>
@@ -14,194 +16,160 @@
     <title>Config Wizard Helper</title>
   </head>
   <body>
-    <div id="content" class="col-md-12">
-      <h1>Config Wizard Helper</h1>
-
-      <h2>Please select a microcontroller unit</h2>
-
-      <select name="MCU" id="MCU">
-        <option selected value="C8051F410">C8051F410</option>
-        <option value="Other">Other...</option>
-      </select>
-
-      <div name="SelectApplicationC8051F410" id="SelectApplicationC8051F410">
-        <h2>Please select an application</h2>
-
-        <input type="button" name="Generate Timer Overflow" id="GenerateTimerOverFlow" value="Generate Timer Overflow">
-        <input type="button" name="Set UART Communication" id="SetUARTCommunication" value="Set UART Communication">
-        <input type="button" name="Set ADC" id="SetADC" value="Set ADC">
+    <div id="content" >
+      <div id="left_div" class="col-md-3 col-sm-12 col-xs-12">
+        <div id="notification_div">
+          <h1 id="notification"></h1>
+        </div>
       </div>
-
-      <div name="ManageUsagesDiv" id="ManageUsagesDiv">
-          <input type="button" name="DeleteTimer1Usage" id="DeleteTimer1Usage" value="Delete Timer 1 Usage">
-          <p id="DeleteTimer1UsageFeedback"></p>
-      </div>
-
-      <div name="SetTimerC8051F410" id="SetTimerC8051F410">
-        <h2>Set overflow time of timer modules</h2>
-        <label for="OverflowFrequency">Overflow frequency:</label>
-        <span><input type="number" min="0" id="OverflowFrequency" name="OverflowFrequency" placeholder="e.g.: 1"> Hz</span>
-        <br>
-        <label for="GenerateTimerOverFlowFromRestrictions" id="GenerateTimerOverFlowFromRestrictionsLabel"><strong>Restrictions</strong></label>
-        <br>
-        <div name="GenerateTimerOverFlowFromRestrictions" id="GenerateTimerOverFlowFromRestrictions">
-          <label for="SYSCLK">System Clock:</label>
-          <select id="SYSCLK" name="SYSCLK">
-            <option selected value=-1>Please select a system clock</option>
-            <option value=191406>191406 Hz</option>
-            <option value=382813>382813 Hz</option>
-            <option value=765625>765625 Hz</option>
-            <option value=1531250>1531250 Hz</option>
-            <option value=3062500>3062500 Hz</option>
-            <option value=6125000>6125000 Hz</option>
-            <option value=12250000>12250000 Hz</option>
-            <option value=24500000>24500000 Hz</option>
-            <option class="editable" value=0>External clock value</option>
+      <div id="center_div" class="col-md-6 col-sm-12 col-xs-12">
+        <div id="select_mcu">
+          <h2>Please select a microcontroller unit</h2>
+          <select name="MCU" id="MCU">
+            <option selected value="C8051F410">C8051F410</option>
+            <option value="Other">Other...</option>
           </select>
-          <span><input class="editOption" style="display:none;" /></span>
-          <br>
-          <label for="TimerModule">Timer Module:</label>
-          <select id="TimerModule" name="TimerModule">
-            <option selected value="">Please select a timer</option>
-            <option value="Timer0">Timer0</option>
-            <option value="Timer1">Timer1</option>
-            <option value="Timer2">Timer2</option>
-            <option value="Timer3">Timer3</option>
-          </select>
-          <br>
         </div>
-        <input type="button" id="CalculateReloadValue" name="Calculate" value="Calculate">
 
-        <div name="ResultTimerC8051F410" id="ResultTimerC8051F410">
-          <div id="Settings">
-            <label for="ReloadValue">Reload value : hex ( dec ) </label>
-	        <p id="ReloadValue"></p>
-            <label for="SystemClock">System clock: </label>
-	        <p id="SystemClock"></p>
-            <label for="Timer">Timer module: </label>
-	        <p id="Timer"></p>
-            <label for="TimerClockSource">Timer clock source: </label>
-	        <p id="TimerClockSource"></p>
-            <label for="TimerMode">Timer mode: </label>
-	        <p id="TimerMode"></p>
-	      </div>
-          <div id="InterruptCode">
-            <p>Could not solve the issue with a single timer interrupt
-              but it can be solved by software support.</p>
-            <pre><code class="code">
-void intHandler(void) __interrupt <code id="TimerInterrupt">"int_number"</code> {
-    static unsigned char divisor = <code id="TimerInterruptDivisorInit">"divisor"</code>;
-    <code id="TimerFlagDelete">"timer_flag_id = 0;"</code>
-    divisor--;
-    if (!divisor) {
-        divisor = <code id="TimerInterruptDivisorReset">"divisor"</code>;
-
-        // Paste your code here.
-
-    }
-}
-            </code></pre>
+        <nav class="navbar navbar-default">
+          <div class="container-fluid">
+            <div class="navbar-header">
+              <a class="navbar-brand">Config Wizard Helper</a>
+            </div>
+            <ul class="nav navbar-nav  navbar-right">
+              <li id="set_timer_module_element"><a href="#" class="ignore-click" id="set_timer_module">Set timer module</a></li>
+              <li id="set_uart_module_element"><a href="#" class="ignore-click" id="set_uart_module">Set UART module</a></li>
+              <li id="set_adc_module_element"><a href="#" class="ignore-click" id="set_adc_module">Set ADC module</a></li>
+            </ul>
           </div>
-          <input type="button" id="SetTimerModule" name="Set Timer Module" value="Set Timer Module">
-          <p id="SetTimerModuleFeedback"></p>
+        </nav>
+        <div name="manage_usages_div" id="manage_usages_div">
+            <input type="button" name="DeleteTimer1Usage" id="DeleteTimer1Usage" value="Delete Timer 1 Usage">
+            <p id="DeleteTimer1UsageFeedback"></p>
         </div>
-      </div>
 
-      <!-- Other application forms go here. -->
+        <div name="application" id="application_div">
+          <h2 id="application_title"></h2>
 
+          <form class="form-group">
+            <div id="timer_overflow_frequency_div" class="input-group">
+              <label class="input-group-addon" for="timer_overflow_frequency">Overflow frequency</label>
+              <input class="form-control" type="number" min="0" id="timer_overflow_frequency" name="OverflowFrequency" placeholder="1">
+              <span class="input-group-addon">Hz</span>
+              <br>
+            </div>
+            <div id="uart_bit_per_sec_div" class="input-group">
+              <label class="input-group-addon" for="uart_bit_per_sec">Bit / sec</label>
+              <input class="form-control" type="number" min="0" id="uart_bit_per_sec" name="bitPerSec" placeholder="1">
+              <span class="input-group-addon" >bips</span>
+              <br>
+            </div>
+            <div id="adc_r_ext_div" class="input-group">
+              <label class="input-group-addon" for="adc_r_ext">External resistance</label>
+              <input class="form-control" type="number" min="0" id="adc_r_ext" name="R" placeholder="x Ohm">
+              <span class="input-group-addon">Ohm</span>
+              <br>
+            </div>
 
-      <div name="SetUARTC8051F410" id="SetUARTC8051F410">
-        <h2>Set UART configuration</h2>
-
-        <form name="SetUARTForm" id="SetUARTForm" method="#" action="">
-          <label for="bitPerSec">Bit / sec:</label>
-          <span><input type="number" min="0" id="bitPerSec" name="bitPerSec" placeholder="e.g.: 1"> bit / sec</span>
-          <br>
-          <label for="SetUARTFromRestrictions" id="SetUARTFromRestrictionsLabel"><strong>Restrictions</strong></label>
-          <br>
-          <div name="SetUARTFromRestrictions" id="SetUARTFromRestrictions">
-            <label for="UARTSYSCLK">System Clock:</label>
-            <select id="UARTSYSCLK" name="UARTSYSCLK">
-              <option selected value=-1>Please select a system clock</option>
-              <option value=191406>191406 Hz</option>
-              <option value=382813>382813 Hz</option>
-              <option value=765625>765625 Hz</option>
-              <option value=1531250>1531250 Hz</option>
-              <option value=3062500>3062500 Hz</option>
-              <option value=6125000>6125000 Hz</option>
-              <option value=12250000>12250000 Hz</option>
-              <option value=24500000>24500000 Hz</option>
-              <option class="editable" value=0>External clock value</option>
-            </select>
-            <span><input class="editOption" style="display:none;" /></span>
+            <button type="button" class="btn btn-info form-control" data-toggle="collapse" data-target="#restrictions_div"><span class="glyphicon glyphicon-wrench"></span> Restrictions</button>
             <br>
-            <label for="UARTAccuracy">Accuracy:</label>
-            <span><input type="number" min="0" id="UARTAccuracy" value=2 name="UARTAccuracy" placeholder="e.g.: 1"> %</span>
-            <br>
+            <div name="restrictions" id="restrictions_div" class="collapse form-group">
+              <div id="system_clock_div">
+                <label class="input-group-addon" for="system_clock">System Clock:</label>
+                <select class="form-control dropdown" id="system_clock" name="system_clock">
+                  <option selected value=-1>Please select a system clock</option>
+                  <option value=191406>191406 Hz</option>
+                  <option value=382813>382813 Hz</option>
+                  <option value=765625>765625 Hz</option>
+                  <option value=1531250>1531250 Hz</option>
+                  <option value=3062500>3062500 Hz</option>
+                  <option value=6125000>6125000 Hz</option>
+                  <option value=12250000>12250000 Hz</option>
+                  <option value=24500000>24500000 Hz</option>
+                  <option class="editable" value=0>External clock value</option>
+                </select>
+                <span><input class="editOption" style="display:none;" /></span>
+                <br>
+              </div>
+              <div id="timer_module_div" class="form-group">
+                <label class="input-group-addon" for="timer_module">Timer Module:</label>
+                <select class="form-control dropdown" id="timer_module" name="TimerModule">
+                  <option selected value="">Please select a timer</option>
+                  <option value="Timer0">Timer0</option>
+                  <option value="Timer1">Timer1</option>
+                  <option value="Timer2">Timer2</option>
+                  <option value="Timer3">Timer3</option>
+                </select>
+                <br>
+              </div>
+              <div id="uart_accuracy_div" class="input-group">
+                <label class="input-group-addon" for="uart_accuracy">Accuracy:</label>
+                <input class="form-control" type="number" min="0" id="uart_accuracy" value=2 name="UARTAccuracy" placeholder="e.g.: 1">
+                <span class="input-group-addon">%</span>
+                <br>
+              </div>
+            </div>
+            <input type="button" class="btn btn-primary form-control" id="calculate" name="Calculate" value="Calculate">
+          </form>
+
+          <div name="result" id="result">
+            <div id="settings">
+              <div id="result_system_clock_div">
+                <label for="result_system_clock">System clock: </label>
+                <p id="result_system_clock"></p>
+              </div>
+              <div id="result_timer_reload_value_div">
+                <label for="result_timer_reload_value">Reload value : hex ( dec ) </label>
+              <p id="result_timer_reload_value"></p>
+              </div>
+              <div id="result_timer_module_div">
+                <label for="result_timer_module">Timer module: </label>
+              <p id="result_timer_module"></p>
+              </div>
+              <div id="result_timer_clock_source_div">
+                <label for="result_timer_clock_source">Timer clock source: </label>
+              <p id="result_timer_clock_source"></p>
+              </div>
+              <div id="result_timer_mode_div">
+                <label for="result_timer_mode">Timer mode: </label>
+              <p id="result_timer_mode"></p>
+              </div>
+              <div id="result_uart_bit_per_sec_div">
+                <label for="result_uart_bit_per_sec">Result Bit per sec: </label>
+                <p id="result_uart_bit_per_sec"></p>
+              </div>
+              <div id="result_uart_accuracy_div">
+                <label for="result_uart_accuracy">Accuracy: </label>
+                <p id="result_uart_accuracy"></p>
+              </div>
+              <div id="result_adc_minimum_tracking_time_div">
+                <label for="result_adc_minimum_tracking_time">Minimum Tracking Time: </label>
+                <p id="result_adc_minimum_tracking_time"></p>
+              </div>
+              <div id="result_adc_tracking_time_div">
+                <label for="result_adc_tracking_time">Result Tracking Time: </label>
+                <p id="result_adc_tracking_time"></p>
+              </div>
+              <div id="result_adc_ad0sc_div">
+                <label for="result_adc_ad0sc">System clock divisor to set SAR clock: </label>
+                <p id="result_adc_ad0sc"></p>
+              </div>
+              <div id="result_adc_sar_multiplier_div">
+                <label for="result_adc_sar_multiplier">SAR multiplier (for setting "Post tracking time"): </label>
+                <p id="result_adc_sar_multiplier"></p>
+              </div>
           </div>
-          <input type="button" id="SetUART" name="SetUART" value="Set UART">
-        </form>
-        <p id="UARTIsTimer1Used"></p>
-        <div name="ResultUARTC8051F410" id="ResultUARTC8051F410">
-          <div id="UARTSettings">
-            <label for="UARTReloadValue">Reload value : hex ( dec ) </label>
-            <p id="UARTReloadValue"></p>
-            <label for="UARTSystemClock">System clock: </label>
-            <p id="UARTSystemClock"></p>
-            <label for="UARTTimer">Timer module: </label>
-            <p id="UARTTimer"></p>
-            <label for="UARTTimerClockSource">Timer clock source: </label>
-            <p id="UARTTimerClockSource"></p>
-            <label for="UARTTimerMode">Timer mode: </label>
-            <p id="UARTTimerMode"></p>
-	    <label for="UARTResultBitPerSec">Result Bit per sec: </label>
-	    <p id="UARTResultBitPerSec"></p>
-            <label for="UARTResultAccuracy">Accuracy: </label>
-            <p id="UARTResultAccuracy"></p>
+            <div id="result_timer_interrupt_code_div">
+              <p>Could not solve the issue with a single timer interrupt
+                but it can be solved by software support.</p>
+              <pre><code class="code" id="result_timer_interrupt_code"></code></pre>
+            </div>
+            <input type="button" id="save_module_usage" name="save_module_usage" value="Save Module Usage">
+            <!-- <p id="SetTimerModuleFeedback"></p> -->
           </div>
         </div>
-      </div>
-
-      <div name="SetAdcC8051F410" id="SetAdcC8051F410">
-        <h2>Set Analog / Digital Converter</h2>
-
-        <form name="SetAdcForm" id="SetAdcForm" method="#" action="">
-          <label for="R">Resistance</label>
-          <input type="number" min="0" id="R" name="R" placeholder="x Ohm">
-          <br>
-          <label for="SetADCFromRestrictions" id="SetADCFromRestrictionsLabel"><strong>Restrictions</strong></label>
-          <div name="SetADCFromRestrictions" id="SetADCFromRestrictions">
-            <label for="ADCSYSCLK">System Clock:</label>
-            <select id="ADCSYSCLK" name="ADCSYSCLK">
-              <option selected value=-1>Please select a system clock</option>
-              <option value=191406>191406 Hz</option>
-              <option value=382813>382813 Hz</option>
-              <option value=765625>765625 Hz</option>
-              <option value=1531250>1531250 Hz</option>
-              <option value=3062500>3062500 Hz</option>
-              <option value=6125000>6125000 Hz</option>
-              <option value=12250000>12250000 Hz</option>
-              <option value=24500000>24500000 Hz</option>
-              <option class="editable" value=0>External clock value</option>
-            </select>
-            <span><input class="editOption" style="display:none;" /></span>
-          </div>
-          <br>
-          <input type="button" name="SetADC" value="Set ADC" id="CalculateADC">
-        </form>
-
-        <div name="ResultAdcC8051F410" id="ResultAdcC8051F410">
-          <label for="minimumTrackingTime">Minimum Tracking Time: </label>
-          <p id="minimumTrackingTime"></p>
-          <label for="resultTrackingTime">Result Tracking Time: </label>
-          <p id="resultTrackingTime"></p>
-          <label for="resultADCSYSCLK">System clock: </label>
-          <p id="resultADCSYSCLK"></p>
-          <label for="AD0SC">System clock divisor to set SAR clock: </label>
-          <p id="AD0SC"></p>
-          <label for="resultSARMultiplier">SAR multiplier (for setting "Post tracking time"): </label>
-          <p id="resultSARMultiplier"></p>
         </div>
+      <div id="right_div" class="col-md-3 col-sm-12 col-xs-12">
       </div>
     </div>
   </body>

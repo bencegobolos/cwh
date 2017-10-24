@@ -1,12 +1,12 @@
-#SetTimerC8051F410, #ResultTimerC8051F410, #SetAdcC8051F410, #GenerateTimerOverFlowFromRestrictions, #SetUARTFromRestrictions, #InterruptCode, #SetUARTC8051F410, #ResultUARTC8051F410, #SetTimerModule, #DeleteTimer1Usage, #ResultAdcC8051F410, #SetADCFromRestrictions {
+#application_div, #result, #SetAdcC8051F410, #select_mcu, #SetUARTFromRestrictions, #result_timer_interrupt_code_div, #SetUARTC8051F410, #ResultUARTC8051F410, #save_module_usage, #DeleteTimer1Usage, #ResultAdcC8051F410, #SetADCFromRestrictions {
   display: none;
 }
 
-#GenerateTimerOverFlowFromRestrictionsLabel, #SetUARTFromRestrictionsLabel, #SetADCFromRestrictionsLabel {
+#restrictions_button {
   text-decoration: underline;
 }
 
-#GenerateTimerOverFlowFromRestrictionsLabel:hover, #SetUARTFromRestrictionsLabel:hover, #SetADCFromRestrictionsLabel:hover {
+#restrictions_button:hover {
   background-color: #A5A5A5;
 }
 

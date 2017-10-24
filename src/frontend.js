@@ -1,218 +1,311 @@
+var selected_application = "";
+
+
+
 $(document).ready(function(){
-  $("#GenerateTimerOverFlow").click(function(){
-    $("#SetTimerC8051F410").show(500);
-    $("#SetAdcC8051F410").hide(100);
-    $("#SetUARTC8051F410").hide(100);
-  });
-
-  $("#SetUARTCommunication").click(function(){
-    $("#SetUARTC8051F410").show(500);
-    $("#SetTimerC8051F410").hide(100);
-    $("#SetAdcC8051F410").hide(100);
-
-    var is_timer1_used = isModuleUsed("C8051F410", "Timer1");
-
-    if (is_timer1_used == 1) {
-      document.getElementById("UARTIsTimer1Used").innerHTML = "Timer 1 module is already in use.";
-      $("#ResultUARTC8051F410").hide(500);
-      return;
-    }
-  });
-
-  $("#SetADC").click(function(){
-    $("#SetAdcC8051F410").show(500);
-    $("#SetTimerC8051F410").hide(100);
-    $("#SetUARTC8051F410").hide(100);
-  });
-
-  $("#DeleteTimer1Usage").click(function(){
-    if (C8051F410.set_modules["Timer1"] == undefined) {
-      document.getElementById("DeleteTimer1UsageFeedback").innerHTML = "Could not delete Timer 1 usage: no usages found.";
-      $("#DeleteTimer1UsageFeedback").show(100).delay(3000).hide(100);
-    } else {
-      delete C8051F410.set_modules["Timer1"];
-      document.getElementById("DeleteTimer1UsageFeedback").innerHTML = "Timer 1 usage has been deleted.";
-      $("#DeleteTimer1Usage").hide(500);
-      $("#DeleteTimer1UsageFeedback").show(100).delay(3000).hide(100);
-      $("#UARTIsTimer1Used").hide(100);
-    }
-  });
-
-  $("#GenerateTimerOverFlowFromRestrictionsLabel").click(function(){
-    $("#GenerateTimerOverFlowFromRestrictions").toggle(500);
-  });
-
-  $("#SetUARTFromRestrictionsLabel").click(function(){
-    $("#SetUARTFromRestrictions").toggle(500);
-  });
-
-  $("#SetADCFromRestrictionsLabel").click(function(){
-    $("#SetADCFromRestrictions").toggle(500);
-  });
-
   /* This handles the external system clock value option (select or other combo box)
    *  The solution was found here:
    *  http://stackoverflow.com/questions/5650457/html-select-form-with-option-to-enter-custom-value
    *  */
-  var initialText = $('.editable').val();
-  $('.editOption').val(initialText);
-
-  $('#SYSCLK').change(function(){
-    var selected = $('option:selected', this).attr('class');
-    var optionText = $('.editable').text();
-
-    if(selected == "editable"){
-      $('.editOption').show();
-      $('.editOption').keyup(function(){
-        var editText = $('.editOption').val();
-        $('.editable').val(editText);
-        $('.editable').html(editText);
-      });
-
-    }else{
-      $('.editOption').hide();
-    }
+  $("#set_timer_module").click(function(){
+    document.getElementById("application_title").innerHTML = timer_application_title;
+    show_timer_application_form();
+    selected_application = timer_application;
   });
 
-  /* Copy of the thing above this.
-   * This handles the external system clock value option (select or other combo box)
-   *  The solution was found here:
-   *  http://stackoverflow.com/questions/5650457/html-select-form-with-option-to-enter-custom-value
-   *  */
-  var initialText = $('.editable').val();
-  $('.editOption').val(initialText);
-
-  $('#UARTSYSCLK').change(function(){
-    var selected = $('option:selected', this).attr('class');
-    var optionText = $('.editable').text();
-
-    if(selected == "editable"){
-      $('.editOption').show();
-      $('.editOption').keyup(function(){
-        var editText = $('.editOption').val();
-        $('.editable').val(editText);
-        $('.editable').html(editText);
-      });
-
-    }else{
-      $('.editOption').hide();
-    }
+  /* This function is used for the navigation bar. It stops rediricting when an application is selected.
+   https://stackoverflow.com/questions/15622100/how-can-i-disable-href-if-onclick-is-executed
+   */
+  $(".ignore-click").click(function(){
+    return false;
   });
 
-  $("#CalculateReloadValue").click(function(){
-    var mcu = document.getElementById("MCU").value;
-    var overflow_frequency = document.getElementById("OverflowFrequency").value;
-    var sysclk = document.getElementById("SYSCLK").value;
-    var timer_module = document.getElementById("TimerModule").value;
+  $("#set_uart_module").click(function(){
+    document.getElementById("application_title").innerHTML = uart_application_title;
+    show_uart_application_form();
+    selected_application = uart_application;
 
-    var result = executeTimerOverflow(mcu, overflow_frequency, sysclk, timer_module);
-
-    if (result.result_reload_value < 0 || result.result_reload_value == undefined) {
-      document.getElementById("ReloadValue").innerHTML = "No result.";
-      document.getElementById("SystemClock").innerHTML = "-";
-      document.getElementById("Timer").innerHTML = "-";
-      document.getElementById("TimerClockSource").innerHTML = "-";
-      document.getElementById("TimerMode").innerHTML = "-";
-      $("SetTimerModule").hide();
-      $("#InterruptCode").hide(100);
-    } else {
-      document.getElementById("ReloadValue").innerHTML = "0x" + decimalToHex(Math.ceil(result.result_reload_value), 4) + " ( " + Math.ceil(result.result_reload_value) + " )";
-      document.getElementById("SystemClock").innerHTML = result.system_clock + " Hz";
-      document.getElementById("Timer").innerHTML = result.timer_module.name;
-      document.getElementById("TimerClockSource").innerHTML = result.timer_clock_source;
-      document.getElementById("TimerMode").innerHTML = result.timer_mode;
-      document.getElementById("TimerInterrupt").innerHTML = result.timer_module.interrupt_name;
-      document.getElementById("TimerFlagDelete").innerHTML = result.timer_module.interrupt_flag_delete;
-      document.getElementById("TimerInterruptDivisorInit").innerHTML = result.result_divisor;
-      document.getElementById("TimerInterruptDivisorReset").innerHTML = result.result_divisor;
-
-      if (result.result_divisor > 1) {
-        $("#InterruptCode").show(500);
-      } else {
-        $("#InterruptCode").hide(100);
-      }
-    }
-
-    $("#SetTimerModule").show();
-    $("#SetTimerModule").click(function(){
-      var mcu_obj = getMcu(mcu_list, mcu);
-      var retval = saveModuleUsage(mcu_obj, getTimerModule(mcu_obj, result.timer_module.name), result);
-      if (retval == 0) {
-        document.getElementById("SetTimerModuleFeedback").innerHTML = "Usage of " + result.timer_module.name + " has been saved.";
-        $("#SetTimerModuleFeedback").show(100).delay(3000).hide(100);
-        $("#DeleteTimer1Usage").show(500);
-      } else {
-        document.getElementById("SetTimerModuleFeedback").innerHTML = "Module " + result.timer_module.name + " is already in use.";
-        $("#SetTimerModuleFeedback").show(100).delay(3000).hide(100);
-      }
-    });
-
-    $("#ResultTimerC8051F410").show(500);
-  });
-
-  $("#SetUART").click(function(){
-    var mcu = document.getElementById("MCU").value;
-    var bit_per_sec = document.getElementById("bitPerSec").value;
-    var uart_sysclk = document.getElementById("UARTSYSCLK").value;
-    var uart_accuracy = document.getElementById("UARTAccuracy").value;
-
-    var result = calculateUART(mcu, bit_per_sec, uart_sysclk, uart_accuracy);
-
-    var result_bit_per_sec = calculateRealFrequency(Math.round(result.result_reload_value), result.system_clock, result.timer_clock_source,result.timer_mode) / 2;
-    //var result_accuracy = bit_per_sec/result_bit_per_sec;
-    var result_accuracy = Math.abs((result_bit_per_sec-bit_per_sec)/(result_bit_per_sec+bit_per_sec))*100;
-
-    var is_timer1_used = isModuleUsed(mcu, "Timer1");
+    var is_timer1_used = isModuleUsed("C8051F410", "Timer1");
 
     if (is_timer1_used == 1) {
-      document.getElementById("UARTIsTimer1Used").innerHTML = "Timer 1 module is already in use.";
-      $("#ResultUARTC8051F410").hide(500);
-      return;
-    } else {
-      if (result.result_reload_value < 0 || result.result_reload_value == undefined || result_accuracy > uart_accuracy) {
-        document.getElementById("UARTReloadValue").innerHTML = "No result.";
-        document.getElementById("UARTSystemClock").innerHTML = "-";
-        document.getElementById("UARTTimer").innerHTML = "-";
-        document.getElementById("UARTTimerClockSource").innerHTML = "-";
-        document.getElementById("UARTTimerMode").innerHTML = "-";
-        document.getElementById("UARTResultBitPerSec").innerHTML = "-";
-        document.getElementById("UARTResultAccuracy").innerHTML = "-";
-      } else {
-        document.getElementById("UARTReloadValue").innerHTML = "0x" + decimalToHex(Math.ceil(result.result_reload_value), 4) + " ( " + Math.ceil(result.result_reload_value) + " )";
-        document.getElementById("UARTSystemClock").innerHTML = result.system_clock + " Hz";
-        document.getElementById("UARTTimer").innerHTML = result.timer_module.name;
-        document.getElementById("UARTTimerClockSource").innerHTML = result.timer_clock_source;
-        document.getElementById("UARTTimerMode").innerHTML = result.timer_mode;
-        document.getElementById("UARTResultBitPerSec").innerHTML = result_bit_per_sec.toFixed(0);
-        document.getElementById("UARTResultAccuracy").innerHTML = result_accuracy.toFixed(3) + " %";
-      }
+      notify("Timer 1 module is already in use.");
+      $("#result").hide();
     }
-
-    $("#ResultUARTC8051F410").show(500);
   });
 
-  $("#CalculateADC").click(function(){
-    var mcu = document.getElementById("MCU").value;
-    var R = document.getElementById("R").value;
-    var sysclk = document.getElementById("ADCSYSCLK").value;
-
-    var minimum_track_time = (R / 1000) * 0.00000011 + 0.00000054;
-    document.getElementById("minimumTrackingTime").innerHTML = minimum_track_time + " sec";
-
-    var result = calculateAdc(mcu, sysclk, R);
-
-    if (result < 0) {
-      document.getElementById("resultTrackingTime").innerHTML = "All settings result in a lower tracking time than necessary.";
-      document.getElementById("resultADCSYSCLK").innerHTML = "-";
-      document.getElementById("AD0SC").innerHTML = "-";
-      document.getElementById("resultSARMultiplier").innerHTML = "-";
+  $("#set_adc_module").click(function(){
+    document.getElementById("application_title").innerHTML = adc_application_title;
+    show_adc_application_form();
+    selected_application = adc_application;
+  });
+/*
+  $("#restrictions_button").click(function(){
+    $("#restrictions_div").toggle(500);
+  });
+*/
+  $("#DeleteTimer1Usage").click(function(){
+    if (C8051F410.set_modules["Timer1"] == undefined) {
+      document.getElementById("DeleteTimer1UsageFeedback").innerHTML = "Could not delete Timer 1 usage: no usages found.";
+      $("#DeleteTimer1UsageFeedback").show().delay(3000).hide();
     } else {
-      document.getElementById("resultTrackingTime").innerHTML = result.post_tracking_time + " sec";
-      document.getElementById("resultADCSYSCLK").innerHTML = result.system_clock + " Hz";
-      document.getElementById("AD0SC").innerHTML = result.ad0sc + " ( " + result.sar_clock + " Hz )";
-      document.getElementById("resultSARMultiplier").innerHTML = result.sar_multiplier;
+      delete C8051F410.set_modules["Timer1"];
+      notify("Timer 1 usage has been deleted.");
+      $("#DeleteTimer1Usage").hide();
     }
+  });
 
-    $("#ResultAdcC8051F410").show(100);
+  $("#calculate").click(function(){
+    switch (selected_application) {
+      case timer_application:
+        console.log("Timer application is running...");
+        execute_timer_application();
+        show_timer_application_result();
+        break;
+
+      case uart_application:
+        console.log("UART application is running...");
+        execute_uart_application();
+        show_uart_application_result();
+        break;
+
+      case adc_application:
+        console.log("ADC application is running...");
+        execute_adc_application();
+        show_adc_application_result();
+        break;
+
+      default:
+        console.log("Unknown application, \"Calculate\" button does nothing.");
+        break;
+    }
+  });
+
+  $("body").on('DOMSubtreeModified', "#notification", function() {
+    $('#notification').show(0).delay(3000).hide(0);
+  });
+
+  var initialText = $('.editable').val();
+  $('.editOption').val(initialText);
+
+  $('#system_clock').change(function(){
+    var selected = $('option:selected', this).attr('class');
+    var optionText = $('.editable').text();
+
+    if(selected == "editable"){
+      $('.editOption').show();
+      $('.editOption').keyup(function(){
+        var editText = $('.editOption').val();
+        $('.editable').val(editText);
+        $('.editable').html(editText);
+      });
+
+    }else{
+      $('.editOption').hide();
+    }
   });
 });
+
+function show_timer_application_form() {
+  $('#set_timer_module_element').addClass('active');
+  $('#set_uart_module_element').removeClass('active');
+  $('#set_adc_module_element').removeClass('active');
+  $("#result").hide();
+  $("#application_div").show();
+  $("#timer_overflow_frequency_div").show();
+  $("#uart_bit_per_sec_div").hide();
+  $("#adc_r_ext_div").hide();
+  $("#system_clock_div").show();
+  $("#timer_module_div").show();
+  $("#uart_accuracy_div").hide();
+}
+
+function show_timer_application_result() {
+  $("#result_system_clock_div").show();
+  $("#result_timer_reload_value_div").show();
+  $("#result_timer_module_div").show();
+  $("#result_timer_clock_source_div").show();
+  $("#result_timer_mode_div").show();
+  $("#result_uart_bit_per_sec_div").hide();
+  $("#result_uart_accuracy_div").hide();
+  $("#result_adc_minimum_tracking_time_div").hide();
+  $("#result_adc_tracking_time_div").hide();
+  $("#result_adc_ad0sc_div").hide();
+  $("#result_adc_sar_multiplier_div").hide();
+
+  $("#result").show();
+}
+
+function show_uart_application_form() {
+  $('#set_timer_module_element').removeClass('active');
+  $('#set_uart_module_element').addClass('active');
+  $('#set_adc_module_element').removeClass('active');
+  $("#result").hide();
+  $("#application_div").show();
+  $("#timer_overflow_frequency_div").hide();
+  $("#uart_bit_per_sec_div").show();
+  $("#adc_r_ext_div").hide();
+  $("#system_clock_div").show();
+  $("#timer_module_div").hide();
+  $("#uart_accuracy_div").show();
+}
+
+function show_uart_application_result() {
+  $("#result_system_clock_div").show();
+  $("#result_timer_reload_value_div").show();
+  $("#result_timer_module_div").show();
+  $("#result_timer_clock_source_div").show();
+  $("#result_timer_mode_div").show();
+  $("#result_uart_bit_per_sec_div").show();
+  $("#result_uart_accuracy_div").show();
+  $("#result_adc_minimum_tracking_time_div").hide();
+  $("#result_adc_tracking_time_div").hide();
+  $("#result_adc_ad0sc_div").hide();
+  $("#result_adc_sar_multiplier_div").hide();
+  $("#result_timer_interrupt_code_div").hide();
+
+  $("#result").show();
+}
+
+function show_adc_application_form() {
+  $('#set_timer_module_element').removeClass('active');
+  $('#set_uart_module_element').removeClass('active');
+  $('#set_adc_module_element').addClass('active');
+  $("#result").hide();
+  $("#application_div").show();
+  $("#timer_overflow_frequency_div").hide();
+  $("#uart_bit_per_sec_div").hide();
+  $("#adc_r_ext_div").show();
+  $("#system_clock_div").show();
+  $("#timer_module_div").hide();
+  $("#uart_accuracy_div").hide();
+}
+
+function show_adc_application_result() {
+  $("#result_system_clock_div").show();
+  $("#result_timer_reload_value_div").hide();
+  $("#result_timer_module_div").hide();
+  $("#result_timer_clock_source_div").hide();
+  $("#result_timer_mode_div").hide();
+  $("#result_uart_bit_per_sec_div").hide();
+  $("#result_uart_accuracy_div").hide();
+  $("#result_adc_minimum_tracking_time_div").show();
+  $("#result_adc_tracking_time_div").show();
+  $("#result_adc_ad0sc_div").show();
+  $("#result_adc_sar_multiplier_div").show();
+  $("#result_timer_interrupt_code_div").hide();
+
+  $("#result").show();
+}
+
+function execute_timer_application() {
+  var mcu = document.getElementById("MCU").value;
+  var overflow_frequency = document.getElementById("timer_overflow_frequency").value;
+  var system_clock = document.getElementById("system_clock").value;
+  var timer_module = document.getElementById("timer_module").value;
+
+  var result = executeTimerOverflow(mcu, overflow_frequency, system_clock, timer_module);
+
+  if (result.result_reload_value < 0 || result.result_reload_value == undefined) {
+    document.getElementById("result_timer_reload_value").innerHTML = "No result.";
+    document.getElementById("result_system_clock").innerHTML = "-";
+    document.getElementById("result_timer_module").innerHTML = "-";
+    document.getElementById("result_timer_clock_source").innerHTML = "-";
+    document.getElementById("result_timer_mode").innerHTML = "-";
+    $("#save_module_usage").hide();
+    $("#result_timer_interrupt_code_div").hide();
+  } else {
+    document.getElementById("result_timer_reload_value").innerHTML = "0x" + decimalToHex(Math.ceil(result.result_reload_value), 4) + " ( " + Math.ceil(result.result_reload_value) + " )";
+    document.getElementById("result_system_clock").innerHTML = result.system_clock + " Hz";
+    document.getElementById("result_timer_module").innerHTML = result.timer_module.name;
+    document.getElementById("result_timer_clock_source").innerHTML = result.timer_clock_source;
+    document.getElementById("result_timer_mode").innerHTML = result.timer_mode;
+
+    if (result.result_divisor > 1) {
+      var interrupt_code = get_timer_interrupt_code(result.timer_module.interrupt_name, result.result_divisor, result.timer_module.interrupt_flag_delete);
+      document.getElementById("result_timer_interrupt_code").innerHTML = interrupt_code;
+      $("#result_timer_interrupt_code_div").show();
+    } else {
+      $("#result_timer_interrupt_code_div").hide();
+    }
+    $("#save_module_usage").show();
+  }
+
+  $("#result").show();
+
+  $("#save_module_usage").click(function(){
+    var mcu_obj = getMcu(mcu_list, mcu);
+    var retval = saveModuleUsage(mcu_obj, getTimerModule(mcu_obj, result.timer_module.name), result);
+    if (retval == 0) {
+      notify("Usage of " + result.timer_module.name + " has been saved.");
+      $("#DeleteTimer1Usage").show();
+    } else {
+      notify("Module " + result.timer_module.name + " is already in use.");
+    }
+  });
+}
+
+function execute_uart_application() {
+  var mcu = document.getElementById("MCU").value;
+  var bit_per_sec = document.getElementById("uart_bit_per_sec").value;
+  var uart_sysclk = document.getElementById("system_clock").value;
+  var uart_accuracy = document.getElementById("uart_accuracy").value;
+
+  var result = calculateUART(mcu, bit_per_sec, uart_sysclk, uart_accuracy);
+
+  var result_bit_per_sec = calculateRealFrequency(Math.round(result.result_reload_value), result.system_clock, result.timer_clock_source,result.timer_mode) / 2;
+  var result_accuracy = Math.abs((result_bit_per_sec-bit_per_sec)/(result_bit_per_sec+bit_per_sec))*100;
+
+  var is_timer1_used = isModuleUsed(mcu, "Timer1");
+
+  if (is_timer1_used == 1) {
+    notify("Timer 1 module is already in use.");
+    $("#result").hide();
+  } else {
+    if (result.result_reload_value < 0 || result.result_reload_value == undefined || result_accuracy > uart_accuracy) {
+      document.getElementById("result_timer_reload_value").innerHTML = "No result.";
+      document.getElementById("result_system_clock").innerHTML = "-";
+      document.getElementById("result_timer_module").innerHTML = "-";
+      document.getElementById("result_timer_clock_source").innerHTML = "-";
+      document.getElementById("result_timer_mode").innerHTML = "-";
+      document.getElementById("result_uart_bit_per_sec").innerHTML = "-";
+      document.getElementById("result_uart_accuracy").innerHTML = "-";
+    } else {
+      document.getElementById("result_timer_reload_value").innerHTML = "0x" + decimalToHex(Math.ceil(result.result_reload_value), 4) + " ( " + Math.ceil(result.result_reload_value) + " )";
+      document.getElementById("result_system_clock").innerHTML = result.system_clock + " Hz";
+      document.getElementById("result_timer_module").innerHTML = result.timer_module.name;
+      document.getElementById("result_timer_clock_source").innerHTML = result.timer_clock_source;
+      document.getElementById("result_timer_mode").innerHTML = result.timer_mode;
+      document.getElementById("result_uart_bit_per_sec").innerHTML = result_bit_per_sec.toFixed(0);
+      document.getElementById("result_uart_accuracy").innerHTML = result_accuracy.toFixed(3) + " %";
+    }
+  }
+}
+
+function execute_adc_application() {
+  var mcu = document.getElementById("MCU").value;
+  var R = document.getElementById("adc_r_ext").value;
+  var system_clock = document.getElementById("system_clock").value;
+
+  var minimum_track_time = (R / 1000) * 0.00000011 + 0.00000054;
+  document.getElementById("result_adc_minimum_tracking_time").innerHTML = minimum_track_time + " sec";
+
+  var result = calculateAdc(mcu, system_clock, R);
+
+  if (result < 0) {
+    document.getElementById("result_adc_tracking_time").innerHTML = "All settings result in a lower tracking time than necessary.";
+    document.getElementById("result_system_clock").innerHTML = "-";
+    document.getElementById("result_adc_ad0sc").innerHTML = "-";
+    document.getElementById("result_adc_sar_multiplier").innerHTML = "-";
+  } else {
+    document.getElementById("result_adc_tracking_time").innerHTML = result.post_tracking_time + " sec";
+    document.getElementById("result_system_clock").innerHTML = result.system_clock + " Hz";
+    document.getElementById("result_adc_ad0sc").innerHTML = result.ad0sc + " ( " + result.sar_clock + " Hz )";
+    document.getElementById("result_adc_sar_multiplier").innerHTML = result.sar_multiplier;
+  }
+
+  $("#ResultAdcC8051F410").show();
+}
+
+function notify(message) {
+  document.getElementById("notification").innerHTML = message;
+}
