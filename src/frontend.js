@@ -19,6 +19,11 @@ $(document).ready(function(){
   $(".ignore-click").click(function(){
     return false;
   });
+/*
+  $("body").on('DOMSubtreeModified', "#notification", function() {
+    $('#notification').show(0).fadeOut(3000);
+  });
+*/
 
   $("#set_uart_module").click(function(){
     document.getElementById("application_title").innerHTML = uart_application_title;
@@ -28,7 +33,7 @@ $(document).ready(function(){
     var is_timer1_used = isModuleUsed("C8051F410", "Timer1");
 
     if (is_timer1_used == 1) {
-      notify("Timer 1 module is already in use.");
+      notify("Timer 1 module is already in use.", "warning");
       $("#result").hide();
     }
   });
@@ -49,7 +54,7 @@ $(document).ready(function(){
       $("#DeleteTimer1UsageFeedback").show().delay(3000).hide();
     } else {
       delete C8051F410.set_modules["Timer1"];
-      notify("Timer 1 usage has been deleted.");
+      notify("Timer 1 usage has been deleted.", "info");
       $("#DeleteTimer1Usage").hide();
     }
   });
@@ -78,10 +83,6 @@ $(document).ready(function(){
         console.log("Unknown application, \"Calculate\" button does nothing.");
         break;
     }
-  });
-
-  $("body").on('DOMSubtreeModified', "#notification", function() {
-    $('#notification').show(0).delay(3000).hide(0);
   });
 
   var initialText = $('.editable').val();
@@ -236,10 +237,10 @@ function execute_timer_application() {
     var mcu_obj = getMcu(mcu_list, mcu);
     var retval = saveModuleUsage(mcu_obj, getTimerModule(mcu_obj, result.timer_module.name), result);
     if (retval == 0) {
-      notify("Usage of " + result.timer_module.name + " has been saved.");
+      notify("Usage of " + result.timer_module.name + " has been saved.", "info");
       $("#DeleteTimer1Usage").show();
     } else {
-      notify("Module " + result.timer_module.name + " is already in use.");
+      notify("Module " + result.timer_module.name + " is already in use.", "warning");
     }
   });
 }
@@ -258,7 +259,7 @@ function execute_uart_application() {
   var is_timer1_used = isModuleUsed(mcu, "Timer1");
 
   if (is_timer1_used == 1) {
-    notify("Timer 1 module is already in use.");
+    notify("Timer 1 module is already in use.", "warning");
     $("#result").hide();
   } else {
     if (result.result_reload_value < 0 || result.result_reload_value == undefined || result_accuracy > uart_accuracy) {
@@ -306,6 +307,11 @@ function execute_adc_application() {
   $("#ResultAdcC8051F410").show();
 }
 
-function notify(message) {
+function notify(message, type) {
+  var notification_div = $("#notification_div");
   document.getElementById("notification").innerHTML = message;
+  notification_div.removeClass();
+  notification_div.addClass("alert");
+  notification_div.addClass("alert-" + type);
+  notification_div.show(0).fadeOut(3000);
 }

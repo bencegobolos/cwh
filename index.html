@@ -18,14 +18,15 @@
   <body>
     <div id="content" >
       <div id="left_div" class="col-md-3 col-sm-12 col-xs-12">
-        <div id="notification_div">
-          <h1 id="notification"></h1>
+        <div id="notification_div" style="width: 100%;">
+          <p id="notification"></p>
         </div>
       </div>
+
       <div id="center_div" class="col-md-6 col-sm-12 col-xs-12">
         <div id="select_mcu">
           <h2>Please select a microcontroller unit</h2>
-          <select name="MCU" id="MCU">
+          <select id="MCU">
             <option selected value="C8051F410">C8051F410</option>
             <option value="Other">Other...</option>
           </select>
@@ -43,40 +44,40 @@
             </ul>
           </div>
         </nav>
-        <div name="manage_usages_div" id="manage_usages_div">
-            <input type="button" name="DeleteTimer1Usage" id="DeleteTimer1Usage" value="Delete Timer 1 Usage">
+        <div id="manage_usages_div">
+            <input type="button" id="DeleteTimer1Usage" value="Delete Timer 1 Usage">
             <p id="DeleteTimer1UsageFeedback"></p>
         </div>
 
-        <div name="application" id="application_div">
+        <div id="application_div">
           <h2 id="application_title"></h2>
 
           <form class="form-group">
             <div id="timer_overflow_frequency_div" class="input-group">
               <label class="input-group-addon" for="timer_overflow_frequency">Overflow frequency</label>
-              <input class="form-control" type="number" min="0" id="timer_overflow_frequency" name="OverflowFrequency" placeholder="1">
+              <input class="form-control" type="number" min="0" id="timer_overflow_frequency" placeholder="1">
               <span class="input-group-addon">Hz</span>
               <br>
             </div>
             <div id="uart_bit_per_sec_div" class="input-group">
               <label class="input-group-addon" for="uart_bit_per_sec">Bit / sec</label>
-              <input class="form-control" type="number" min="0" id="uart_bit_per_sec" name="bitPerSec" placeholder="1">
+              <input class="form-control" type="number" min="0" id="uart_bit_per_sec" placeholder="1">
               <span class="input-group-addon" >bips</span>
               <br>
             </div>
             <div id="adc_r_ext_div" class="input-group">
               <label class="input-group-addon" for="adc_r_ext">External resistance</label>
-              <input class="form-control" type="number" min="0" id="adc_r_ext" name="R" placeholder="x Ohm">
+              <input class="form-control" type="number" min="0" id="adc_r_ext" placeholder="x Ohm">
               <span class="input-group-addon">Ohm</span>
               <br>
             </div>
 
             <button type="button" class="btn btn-info form-control" data-toggle="collapse" data-target="#restrictions_div"><span class="glyphicon glyphicon-wrench"></span> Restrictions</button>
             <br>
-            <div name="restrictions" id="restrictions_div" class="collapse form-group">
+            <div id="restrictions_div" class="collapse form-group">
               <div id="system_clock_div">
                 <label class="input-group-addon" for="system_clock">System Clock:</label>
-                <select class="form-control dropdown" id="system_clock" name="system_clock">
+                <select class="form-control dropdown" id="system_clock">
                   <option selected value=-1>Please select a system clock</option>
                   <option value=191406>191406 Hz</option>
                   <option value=382813>382813 Hz</option>
@@ -93,7 +94,7 @@
               </div>
               <div id="timer_module_div" class="form-group">
                 <label class="input-group-addon" for="timer_module">Timer Module:</label>
-                <select class="form-control dropdown" id="timer_module" name="TimerModule">
+                <select class="form-control dropdown" id="timer_module">
                   <option selected value="">Please select a timer</option>
                   <option value="Timer0">Timer0</option>
                   <option value="Timer1">Timer1</option>
@@ -104,15 +105,15 @@
               </div>
               <div id="uart_accuracy_div" class="input-group">
                 <label class="input-group-addon" for="uart_accuracy">Accuracy:</label>
-                <input class="form-control" type="number" min="0" id="uart_accuracy" value=2 name="UARTAccuracy" placeholder="e.g.: 1">
+                <input class="form-control" type="number" min="0" id="uart_accuracy" value=2 placeholder="e.g.: 1">
                 <span class="input-group-addon">%</span>
                 <br>
               </div>
             </div>
-            <input type="button" class="btn btn-primary form-control" id="calculate" name="Calculate" value="Calculate">
+            <input type="button" class="btn btn-primary form-control" id="calculate" value="Calculate">
           </form>
 
-          <div name="result" id="result">
+          <div id="result">
             <div id="settings">
               <div id="result_system_clock_div">
                 <label for="result_system_clock">System clock: </label>
@@ -120,19 +121,19 @@
               </div>
               <div id="result_timer_reload_value_div">
                 <label for="result_timer_reload_value">Reload value : hex ( dec ) </label>
-              <p id="result_timer_reload_value"></p>
+                <p id="result_timer_reload_value"></p>
               </div>
               <div id="result_timer_module_div">
                 <label for="result_timer_module">Timer module: </label>
-              <p id="result_timer_module"></p>
+                <p id="result_timer_module"></p>
               </div>
               <div id="result_timer_clock_source_div">
                 <label for="result_timer_clock_source">Timer clock source: </label>
-              <p id="result_timer_clock_source"></p>
+                <p id="result_timer_clock_source"></p>
               </div>
               <div id="result_timer_mode_div">
                 <label for="result_timer_mode">Timer mode: </label>
-              <p id="result_timer_mode"></p>
+                <p id="result_timer_mode"></p>
               </div>
               <div id="result_uart_bit_per_sec_div">
                 <label for="result_uart_bit_per_sec">Result Bit per sec: </label>
@@ -164,8 +165,7 @@
                 but it can be solved by software support.</p>
               <pre><code class="code" id="result_timer_interrupt_code"></code></pre>
             </div>
-            <input type="button" id="save_module_usage" name="save_module_usage" value="Save Module Usage">
-            <!-- <p id="SetTimerModuleFeedback"></p> -->
+            <input type="button" id="save_module_usage" value="Save Module Usage">
           </div>
         </div>
         </div>
