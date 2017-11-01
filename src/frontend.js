@@ -118,6 +118,7 @@ function show_timer_application_form() {
   $("#system_clock_div").show();
   $("#timer_module_div").show();
   $("#uart_accuracy_div").hide();
+  $("#adc_max_sampling_div").hide();
 }
 
 function show_timer_application_result() {
@@ -148,6 +149,7 @@ function show_uart_application_form() {
   $("#system_clock_div").show();
   $("#timer_module_div").hide();
   $("#uart_accuracy_div").show();
+  $("#adc_max_sampling_div").hide();
 }
 
 function show_uart_application_result() {
@@ -179,6 +181,7 @@ function show_adc_application_form() {
   $("#system_clock_div").show();
   $("#timer_module_div").hide();
   $("#uart_accuracy_div").hide();
+  $("#adc_max_sampling_div").show();
 }
 
 function show_adc_application_result() {
@@ -286,11 +289,12 @@ function execute_adc_application() {
   var mcu = document.getElementById("MCU").value;
   var R = document.getElementById("adc_r_ext").value;
   var system_clock = document.getElementById("system_clock").value;
+  var max_sampling_time = (1 / document.getElementById("adc_max_sampling").value);
 
   var minimum_track_time = (R / 1000) * 0.00000011 + 0.00000054;
   document.getElementById("result_adc_minimum_tracking_time").innerHTML = minimum_track_time + " sec";
 
-  var result = calculateAdc(mcu, system_clock, R);
+  var result = calculateAdc(mcu, system_clock, R, max_sampling_time);
 
   if (result < 0) {
     document.getElementById("result_adc_tracking_time").innerHTML = "All settings result in a lower tracking time than necessary.";

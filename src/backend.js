@@ -163,8 +163,14 @@ function calculateRealFrequency(reload_value, sysclk, timer_clock_source, timer_
 // #################################################
 // ############### ADC calculation #################
 // #################################################
+/*
+ For Post-Tracking and Dual-Tracking Modes,
+ the tracking time after the convert start signal is equal to the value determined by the AD0TK bits plus 2
+ FCLK cycles. Tracking is immediately followed by a conversion. The ADC0 conversion time is always 13
+ SAR clock cycles plus an additional 2 FCLK cycles to start and complete a conversion.
+ */
 
-function calculateAdc(mcu, sysclk, R) {
+function calculateAdc(mcu, sysclk, R, max_sampling_time) {
 
   var minimum_track_time = (R / 1000) * 0.00000011 + 0.00000054;
   var sar_multipliers = [2, 4, 8, 16];
@@ -177,6 +183,9 @@ function calculateAdc(mcu, sysclk, R) {
   } else {
     system_clocks = [sysclk];
   }
+  if (max_sampling_time == 0) {
+    max_sampling_time = Math.POSITIVE_INFINITY;
+  }
 
   var results = [];
 
@@ -184,16 +193,18 @@ function calculateAdc(mcu, sysclk, R) {
     var system_clock = system_clocks[l];
     var AD0SC = getAD0SC(system_clock);
     var sar_clock = system_clock / (AD0SC + 1);
+    var conversion_time = 13 * (1 / sar_clock) + 2 * (1/system_clock);
     for (var j = 0; j < sar_multipliers.length; ++j) {
       var sar_multiplier = sar_multipliers[j];
       var post_tracking_time = getPostTrackingTime(system_clock, sar_clock, sar_multiplier);
-      if (minimum_track_time <= post_tracking_time) {
+      if (minimum_track_time <= post_tracking_time && conversion_time+post_tracking_time < max_sampling_time) {
         results.push({
           "system_clock" : system_clock,
           "sar_clock" : sar_clock,
           "ad0sc" : AD0SC,
           "sar_multiplier" : sar_multiplier,
-          "post_tracking_time" : post_tracking_time
+          "post_tracking_time" : post_tracking_time,
+          "conversion_time" : conversion_time
         });
       }
     }
