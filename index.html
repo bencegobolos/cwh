@@ -110,9 +110,13 @@
                 <br>
               </div>
               <div id="adc_max_sampling_div" class="input-group">
-                <label class="input-group-addon" for="adc_max_sampling">Maximum sampling</label>
-                <input class="form-control" type="number" min="0" id="adc_max_sampling" placeholder="Enter a maximum sampling frequency.">
-                <span class="input-group-addon">Hz</span>
+                <label class="input-group-addon" for="adc_max_sampling_input_div">Maximum sampling</label>
+                <div id="adc_max_sampling_input_div">
+                  <input class="form-control" type="number" min="0" id="adc_max_sampling_frequency" placeholder="Enter a maximum sampling frequency.">
+                  <span class="input-group-addon">Hz</span>
+                  <input class="form-control" type="number" min="0" id="adc_max_sampling_time" placeholder="Enter a maximum sampling time.">
+                  <span class="input-group-addon">sec</span>
+                </div>
                 <br>
               </div>
             </div>
@@ -149,13 +153,14 @@
                 <label for="result_uart_accuracy">Accuracy: </label>
                 <p id="result_uart_accuracy"></p>
               </div>
-              <div id="result_adc_minimum_tracking_time_div">
-                <label for="result_adc_minimum_tracking_time">Minimum Tracking Time: </label>
-                <p id="result_adc_minimum_tracking_time"></p>
               </div>
-              <div id="result_adc_maximum_conversion_time_div">
-                <label for="result_adc_maximum_conversion_time">Maximum Conversion Time: </label>
-                <p id="result_adc_maximum_conversion_time"></p>
+              <div id="result_adc_ad0sc_div">
+                <label for="result_adc_ad0sc">AD0SC Value (Hex): </label>
+                <p id="result_adc_ad0sc"></p>
+              </div>
+              <div id="result_adc_sar_multiplier_div">
+                <label for="result_adc_sar_multiplier">SAR clock cycles (for setting "Post tracking time"): </label>
+                <p id="result_adc_sar_multiplier"></p>
               </div>
               <div id="result_adc_tracking_time_div">
                 <label for="result_adc_tracking_time">Result Tracking Time: </label>
@@ -165,15 +170,6 @@
                 <label for="result_adc_conversion_time">Result Conversion Time: </label>
                 <p id="result_adc_conversion_time"></p>
               </div>
-              <div id="result_adc_ad0sc_div">
-                <label for="result_adc_ad0sc">System clock divisor to set SAR clock: </label>
-                <p id="result_adc_ad0sc"></p>
-              </div>
-              <div id="result_adc_sar_multiplier_div">
-                <label for="result_adc_sar_multiplier">SAR multiplier (for setting "Post tracking time"): </label>
-                <p id="result_adc_sar_multiplier"></p>
-              </div>
-          </div>
             <div id="result_timer_interrupt_code_div">
               <p>Could not solve the issue with a single timer interrupt
                 but it can be solved by software support.</p>

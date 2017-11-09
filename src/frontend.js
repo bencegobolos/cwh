@@ -104,6 +104,22 @@ $(document).ready(function(){
       $('.editOption').hide();
     }
   });
+
+  $("#adc_max_sampling_frequency").on("change", function () {
+    var adc_max_sampling_frequency = document.getElementById("adc_max_sampling_frequency").value;
+    document.getElementById("adc_max_sampling_time").value = 1 / adc_max_sampling_frequency;
+  });
+
+  $("#adc_max_sampling_time").on("change", function () {
+    var adc_max_sampling_time = document.getElementById("adc_max_sampling_time").value;
+    document.getElementById("adc_max_sampling_frequency").value = 1 / adc_max_sampling_time;
+  });
+
+  $("#adc_r_ext").on("focusout", function () {
+    var R = document.getElementById("adc_r_ext").value;
+    var minimum_track_time = (R / 1000) * 0.00000011 + 0.00000054;
+    notify("ADC minimum tracking time =" + minimum_track_time.toExponential(2) + " sec", "info");
+  });
 });
 
 function show_timer_application_form() {
@@ -129,8 +145,6 @@ function show_timer_application_result() {
   $("#result_timer_mode_div").show();
   $("#result_uart_bit_per_sec_div").hide();
   $("#result_uart_accuracy_div").hide();
-  $("#result_adc_minimum_tracking_time_div").hide();
-  $("#result_adc_maximum_conversion_time_div").hide();
   $("#result_adc_tracking_time_div").hide();
   $("#result_adc_conversion_time_div").hide();
   $("#result_adc_ad0sc_div").hide();
@@ -162,8 +176,6 @@ function show_uart_application_result() {
   $("#result_timer_mode_div").show();
   $("#result_uart_bit_per_sec_div").show();
   $("#result_uart_accuracy_div").show();
-  $("#result_adc_minimum_tracking_time_div").hide();
-  $("#result_adc_maximum_conversion_time_div").hide();
   $("#result_adc_tracking_time_div").hide();
   $("#result_adc_conversion_time_div").hide();
   $("#result_adc_ad0sc_div").hide();
@@ -196,8 +208,6 @@ function show_adc_application_result() {
   $("#result_timer_mode_div").hide();
   $("#result_uart_bit_per_sec_div").hide();
   $("#result_uart_accuracy_div").hide();
-  $("#result_adc_minimum_tracking_time_div").show();
-  $("#result_adc_maximum_conversion_time_div").show();
   $("#result_adc_tracking_time_div").show();
   $("#result_adc_conversion_time_div").show();
   $("#result_adc_ad0sc_div").show();
@@ -295,18 +305,15 @@ function execute_adc_application() {
   var mcu = document.getElementById("MCU").value;
   var R = document.getElementById("adc_r_ext").value;
   var system_clock = document.getElementById("system_clock").value;
-  var max_sampling_time = (1 / document.getElementById("adc_max_sampling").value);
+  var max_sampling_time = (1 / document.getElementById("adc_max_sampling_frequency").value);
 
   var minimum_track_time = (R / 1000) * 0.00000011 + 0.00000054;
-  document.getElementById("result_adc_minimum_tracking_time").innerHTML = minimum_track_time.toExponential(2) + " sec";
-  document.getElementById("result_adc_maximum_conversion_time").innerHTML = max_sampling_time.toExponential(2) + " sec";
 
   var result = calculateAdc(mcu, system_clock, R, max_sampling_time);
 
   if (result < 0) {
     document.getElementById("result_adc_tracking_time").innerHTML = "All settings result in a lower tracking time than necessary.";
     document.getElementById("result_adc_conversion_time").innerHTML = "-";
-    document.getElementById("result_adc_maximum_conversion_time").innerHTML = "-";
     document.getElementById("result_system_clock").innerHTML = "-";
     document.getElementById("result_adc_ad0sc").innerHTML = "-";
     document.getElementById("result_adc_sar_multiplier").innerHTML = "-";
