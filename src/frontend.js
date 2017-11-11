@@ -312,14 +312,11 @@ function execute_adc_application() {
   var result = calculateAdc(mcu, system_clock, R, max_sampling_time);
 
   if (result < 0) {
-    document.getElementById("result_adc_tracking_time").innerHTML = "All settings result in a lower tracking time than necessary.";
-    document.getElementById("result_adc_conversion_time").innerHTML = "-";
+    notify("All settings result in a lower tracking time than necessary.", "danger");
     document.getElementById("result_system_clock").innerHTML = "-";
     document.getElementById("result_adc_ad0sc").innerHTML = "-";
     document.getElementById("result_adc_sar_multiplier").innerHTML = "-";
   } else {
-    document.getElementById("result_adc_tracking_time").innerHTML = result.post_tracking_time.toExponential(2) + " sec";
-    document.getElementById("result_adc_conversion_time").innerHTML = result.conversion_time.toExponential(2) + " sec";
     document.getElementById("result_system_clock").innerHTML = result.system_clock + " Hz";
     document.getElementById("result_adc_ad0sc").innerHTML = result.ad0sc + " ( " + result.sar_clock + " Hz )";
     document.getElementById("result_adc_sar_multiplier").innerHTML = result.sar_multiplier;
@@ -334,5 +331,5 @@ function notify(message, type) {
   notification_div.removeClass();
   notification_div.addClass("alert");
   notification_div.addClass("alert-" + type);
-  notification_div.show(0).fadeOut(3000);
+  notification_div.show(0).fadeOut(5000);
 }
