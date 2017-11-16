@@ -290,12 +290,8 @@ function getMcu(mcu_list, mcu_name) {
 
 
 function saveModuleUsage(mcu, module, result) {
-  if (mcu.set_modules[module.name] == undefined) {
-    mcu.set_modules[module.name] = result;
-    return 0;
-  } else {
-    return -1;
-  }
+  mcu.set_modules[module.name] = result;
+  console.log("Usage of " + module.name + " has been saved.");
 }
 
 function isModuleUsed(mcu, module) {

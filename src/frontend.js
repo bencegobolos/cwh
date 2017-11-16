@@ -247,7 +247,19 @@ function execute_timer_application() {
     } else {
       $("#result_timer_interrupt_code_div").hide();
     }
-    $("#save_module_usage").show();
+
+    // Save module usage.
+    var mcu_obj = getMcu(mcu_list, mcu);
+    var is_timer_used = isModuleUsed(mcu, result.timer_module.name);
+    if (is_timer_used == 0) {
+      saveModuleUsage(mcu_obj, getTimerModule(mcu_obj, result.timer_module.name), result);
+    } else {
+      if (confirm("Do you want to overwrite the usage of " + result.timer_module.name + "?")) {
+        saveModuleUsage(mcu_obj, getTimerModule(mcu_obj, result.timer_module.name), result);
+      } else {
+        console.log("Keeping usage.");
+      }
+    }
   }
 
   $("#result").show();
