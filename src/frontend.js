@@ -253,6 +253,7 @@ function execute_timer_application() {
     var is_timer_used = isModuleUsed(mcu, result.timer_module.name);
     if (is_timer_used == 0) {
       saveModuleUsage(mcu_obj, getTimerModule(mcu_obj, result.timer_module.name), result);
+      print_module_usage(mcu, mcu_obj.set_modules[result.timer_module.name]);
     } else {
       if (confirm("Do you want to overwrite the usage of " + result.timer_module.name + "?")) {
         saveModuleUsage(mcu_obj, getTimerModule(mcu_obj, result.timer_module.name), result);
@@ -345,3 +346,37 @@ function notify(message, type) {
   notification_div.addClass("alert-" + type);
   notification_div.show(0).fadeOut(5000);
 }
+
+function print_module_usage(mcu, usage) {
+  var element = document.getElementById("module_usages");
+  var para = document.createElement("div");
+  para.id = "module_usage_" + usage.timer_module.name;
+  if (document.getElementById(para.id)) {
+    // TODO(bgobolos): Delete element than add new one.
+  } else {
+    addText(para, "System clock: " + usage.system_clock + " <br> " +
+      "Timer module: " + usage.timer_module.name + " <br> " +
+      "Timer clock source: " + usage.timer_clock_source + " <br> " +
+      "Timer mode: " + usage.timer_mode + " <br> "
+    );
+    element.appendChild(para);
+  }
+}
+
+/* How to insert a javascript textNode element on a newline?
+ * https://stackoverflow.com/questions/8147376/how-to-insert-a-javascript-textnode-element-on-a-newline
+ */
+function addText(node,text){
+  var t=text.split(/\s*<br ?\/?>\s*/i),
+    i;
+  if(t[0].length>0){
+    node.appendChild(document.createTextNode(t[0]));
+  }
+  for(i=1;i<t.length;i++){
+    node.appendChild(document.createElement('BR'));
+    if(t[i].length>0){
+      node.appendChild(document.createTextNode(t[i]));
+    }
+  }
+}
+addText(document,"Line 1 <br> Line 2<br/>line 3<BR/>");
