@@ -257,6 +257,7 @@ function execute_timer_application() {
     } else {
       if (confirm("Do you want to overwrite the usage of " + result.timer_module.name + "?")) {
         saveModuleUsage(mcu_obj, getTimerModule(mcu_obj, result.timer_module.name), result);
+        print_module_usage(mcu, mcu_obj.set_modules[result.timer_module.name]);
       } else {
         console.log("Keeping usage.");
       }
@@ -349,18 +350,22 @@ function notify(message, type) {
 
 function print_module_usage(mcu, usage) {
   var element = document.getElementById("module_usages");
-  var para = document.createElement("div");
-  para.id = "module_usage_" + usage.timer_module.name;
-  if (document.getElementById(para.id)) {
-    // TODO(bgobolos): Delete element than add new one.
-  } else {
-    addText(para, "System clock: " + usage.system_clock + " <br> " +
-      "Timer module: " + usage.timer_module.name + " <br> " +
-      "Timer clock source: " + usage.timer_clock_source + " <br> " +
-      "Timer mode: " + usage.timer_mode + " <br> "
-    );
-    element.appendChild(para);
+  var module_usage_id = "module_usage_" + usage.timer_module.name;
+  var module_usage_element = document.getElementById(module_usage_id);
+  console.log(module_usage_element);
+  if (module_usage_element) {
+    console.log("deleteit");
+    element.removeChild(module_usage_element);
   }
+  module_usage_element = document.createElement("div");
+  module_usage_element.id = module_usage_id;
+  addText(module_usage_element, "System clock: " + usage.system_clock + " <br> " +
+    "Timer module: " + usage.timer_module.name + " <br> " +
+    "Reload value: " + "0x" + decimalToHex(Math.ceil(usage.result_reload_value), 4) + " <br> " +
+    "Timer clock source: " + usage.timer_clock_source + " <br> " +
+    "Timer mode: " + usage.timer_mode + " <br> "
+  );
+  element.appendChild(module_usage_element);
 }
 
 /* How to insert a javascript textNode element on a newline?
@@ -379,4 +384,3 @@ function addText(node,text){
     }
   }
 }
-addText(document,"Line 1 <br> Line 2<br/>line 3<BR/>");
