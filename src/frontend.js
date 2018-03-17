@@ -30,7 +30,7 @@ $(document).ready(function(){
     show_uart_application_form();
     selected_application = uart_application;
 
-    var is_timer1_used = isModuleUsed("C8051F410", "Timer1");
+    var is_timer1_used = C8051F410.isModuleUsed("Timer1");
 
     if (is_timer1_used == 1) {
       notify("Timer 1 module is already in use.", "warning");
@@ -250,13 +250,13 @@ function execute_timer_application() {
 
     // Save module usage.
     var mcu_obj = getMcu(mcu_list, mcu);
-    var is_timer_used = isModuleUsed(mcu, result.timer_module.name);
+    var is_timer_used = mcu_obj.isModuleUsed(result.timer_module.name);
     if (is_timer_used == 0) {
-      saveModuleUsage(mcu_obj, getTimerModule(mcu_obj, result.timer_module.name), result);
+      mcu_obj.saveModuleUsage(mcu_obj.getTimerModule(result.timer_module.name), selected_application, result);
       print_module_usage(mcu, mcu_obj.set_modules[result.timer_module.name]);
     } else {
       if (confirm("Do you want to overwrite the usage of " + result.timer_module.name + "?")) {
-        saveModuleUsage(mcu_obj, getTimerModule(mcu_obj, result.timer_module.name), result);
+        mcu_obj.saveModuleUsage(mcu_obj.getTimerModule(result.timer_module.name), selected_application, result);
         print_module_usage(mcu, mcu_obj.set_modules[result.timer_module.name]);
       } else {
         console.log("Keeping usage.");
@@ -279,23 +279,21 @@ function execute_timer_application() {
 }
 
 function execute_uart_application() {
-  var mcu = document.getElementById("MCU").value;
+  var mcu_name = document.getElementById("MCU").value;
   var bit_per_sec = document.getElementById("uart_bit_per_sec").value;
   var uart_sysclk = document.getElementById("system_clock").value;
   var uart_accuracy = document.getElementById("uart_accuracy").value;
 
-  var result = calculateUART(mcu, bit_per_sec, uart_sysclk, uart_accuracy);
+  var result = calculateUART(mcu_name, bit_per_sec, uart_sysclk, uart_accuracy);
 
-  var result_bit_per_sec = calculateRealFrequency(Math.round(result.result_reload_value), result.system_clock, result.timer_clock_source,result.timer_mode) / 2;
-  var result_accuracy = Math.abs((result_bit_per_sec-bit_per_sec)/(result_bit_per_sec+bit_per_sec))*100;
-
-  var is_timer1_used = isModuleUsed(mcu, "Timer1");
+  var mcu_obj = getMcu(mcu_list, mcu_name);
+  var is_timer1_used = mcu_obj.isModuleUsed("Timer1");
 
   if (is_timer1_used == 1) {
     notify("Timer 1 module is already in use.", "warning");
     $("#result").hide();
   } else {
-    if (result.result_reload_value < 0 || result.result_reload_value == undefined || result_accuracy > uart_accuracy) {
+    if (result.result_reload_value < 0 || result.result_reload_value == undefined || result.accuracy > uart_accuracy) {
       document.getElementById("result_timer_reload_value").innerHTML = "No result.";
       document.getElementById("result_system_clock").innerHTML = "-";
       document.getElementById("result_timer_module").innerHTML = "-";
@@ -309,8 +307,8 @@ function execute_uart_application() {
       document.getElementById("result_timer_module").innerHTML = result.timer_module.name;
       document.getElementById("result_timer_clock_source").innerHTML = result.timer_clock_source;
       document.getElementById("result_timer_mode").innerHTML = result.timer_mode;
-      document.getElementById("result_uart_bit_per_sec").innerHTML = result_bit_per_sec.toFixed(0);
-      document.getElementById("result_uart_accuracy").innerHTML = result_accuracy.toFixed(3) + " %";
+      document.getElementById("result_uart_bit_per_sec").innerHTML = result.bit_per_sec.toFixed(0);
+      document.getElementById("result_uart_accuracy").innerHTML = result.accuracy.toFixed(3) + " %";
     }
   }
 }
@@ -350,7 +348,7 @@ function notify(message, type) {
 
 function print_module_usage(mcu, usage) {
   var element = document.getElementById("module_usages");
-  var module_usage_id = "module_usage_" + usage.timer_module.name;
+  var module_usage_id = "module_usage_" + usage.result.timer_module.name;
   var module_usage_element = document.getElementById(module_usage_id);
   console.log(module_usage_element);
   if (module_usage_element) {
@@ -359,11 +357,11 @@ function print_module_usage(mcu, usage) {
   }
   module_usage_element = document.createElement("div");
   module_usage_element.id = module_usage_id;
-  addText(module_usage_element, "System clock: " + usage.system_clock + " <br> " +
-    "Timer module: " + usage.timer_module.name + " <br> " +
-    "Reload value: " + "0x" + decimalToHex(Math.ceil(usage.result_reload_value), 4) + " <br> " +
-    "Timer clock source: " + usage.timer_clock_source + " <br> " +
-    "Timer mode: " + usage.timer_mode + " <br> "
+  addText(module_usage_element, "System clock: " + usage.result.system_clock + " <br> " +
+    "Timer module: " + usage.result.timer_module.name + " <br> " +
+    "Reload value: " + "0x" + decimalToHex(Math.ceil(usage.result.result_reload_value), 4) + " <br> " +
+    "Timer clock source: " + usage.result.timer_clock_source + " <br> " +
+    "Timer mode: " + usage.result.timer_mode + " <br> "
   );
   element.appendChild(module_usage_element);
 }

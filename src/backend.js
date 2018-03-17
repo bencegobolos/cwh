@@ -17,7 +17,7 @@ function executeTimerOverflow(mcu_name, overflow_frequency, sysclk, timer_module
   if (timer_module_name == "") {
     timer_modules = mcu.timer_modules;
   } else {
-    timer_modules = [getTimerModule(mcu, timer_module_name)];
+    timer_modules = [mcu.getTimerModule(timer_module_name)];
   }
 
   // Initialize results array.
@@ -126,7 +126,7 @@ function calculateReloadValue(overflow_frequency, timer_clock, mode) {
 // ############# UART configuration ################
 // #################################################
 
-function calculateUART(mcu_name, bitPerSec, sysclk, accuracy) {
+function calculateUART(mcu_name, bit_per_sec, sysclk, accuracy) {
   var mcu = getMcu(mcu_list, mcu_name);
 
   // Optional parameters.
@@ -137,7 +137,11 @@ function calculateUART(mcu_name, bitPerSec, sysclk, accuracy) {
     system_clocks = [sysclk];
   }
 
-  var result_settings = executeTimerOverflow(mcu.name, bitPerSec*2, system_clocks, "Timer1");
+  var result_settings = executeTimerOverflow(mcu.name, bit_per_sec*2, system_clocks, "Timer1");
+
+  result_settings.bit_per_sec = calculateRealFrequency(Math.round(result_settings.result_reload_value), result_settings.system_clock, result_settings.timer_clock_source,result_settings.timer_mode) / 2;
+  result_settings.accuracy = Math.abs((result_settings.bit_per_sec-bit_per_sec)/(result_settings.bit_per_sec+bit_per_sec))*100;
+
   return result_settings;
 }
 
@@ -242,39 +246,7 @@ function decimalToHex(decimal, chars) {
 }
 
 function calculateTimerClockValue(timer_clock_source, system_clock) {
-  var n;
-
-  // Get division number from timer_clock_source.
-  switch (timer_clock_source) {
-    case SYSCLK:
-      n = 1;
-      break;
-    case SYSCLK4:
-      n = 4;
-      break;
-    case SYSCLK12:
-      n = 12;
-      break;
-    case SYSCLK48:
-      n = 48;
-      break;
-    default:
-      return -1;
-  }
-
-  return Math.round(system_clock / n);
-}
-
-
-function getTimerModule(mcu, timer_module_name) {
-  for (var x in mcu.timer_modules) {
-    var timer_module = mcu.timer_modules[x];
-    if (timer_module.name == timer_module_name) {
-      return timer_module;
-    }
-  }
-  // No timer module has been found with the name: timer_module_name.
-  return undefined;
+  return Math.round(system_clock / timer_clock_source);
 }
 
 function getMcu(mcu_list, mcu_name) {
@@ -287,22 +259,3 @@ function getMcu(mcu_list, mcu_name) {
   // No mcu has been found with the name: mcu_name.
   return undefined;
 }
-
-
-function saveModuleUsage(mcu, module, result) {
-  mcu.set_modules[module.name] = result;
-  console.log("Usage of " + module.name + " has been saved.");
-}
-
-function isModuleUsed(mcu, module) {
-  var mcu_obj = getMcu(mcu_list, mcu);
-  var module_obj = getTimerModule(mcu_obj, module);
-  if (mcu_obj.set_modules[module_obj.name] == undefined) {
-    // Module is not used
-    return 0;
-  } else {
-    // Module is used.
-    return 1;
-  }
-}
-
