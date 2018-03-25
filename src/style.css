@@ -21,3 +21,6 @@
 .unit {
   text-align: right;
 }
+input {
+  margin: 5px 0 !important;
+}

@@ -140,11 +140,11 @@
                 <br>
               </div>
 
-              <button type="button" class="btn btn-info form-control rests" data-toggle="collapse" data-target="#adc_application_restrictions_div"><span class="glyphicon glyphicon-wrench"></span> Restrictions</button>
+              <button type="button" class="btn btn-info form-control rest" data-toggle="collapse" data-target="#adc_application_restrictions_div"><span class="glyphicon glyphicon-wrench"></span> Restrictions</button>
 
               <div id="adc_application_restrictions_div" class="collapse form-group">
                 <div id="adc_application_system_clock_div">
-                  <label class="input-group-addon" for="adc_application_system_clock">System Clock</label>
+                  <label class="col-sm-4 col-form-label" for="adc_application_system_clock">System Clock</label>
                   <div class="col-sm-7">
                     <select class="form-control dropdown" id="adc_application_system_clock">
                       <option selected value=-1>Please select a system clock</option>
@@ -163,14 +163,18 @@
                   <br>
                 </div>
                 <div id="adc_max_sampling_div" class="input-group">
-                  <label class="input-group-addon" for="adc_max_sampling_input_div">Maximum sampling</label>
+                  <label class="col-sm-4 col-form-label" for="adc_max_sampling_input_div">Maximum sampling</label>
                   <div id="adc_max_sampling_input_div">
-                    <input class="form-control" type="number" min="0" id="adc_max_sampling_frequency" placeholder="Enter a maximum sampling frequency.">
-                    <span class="input-group-addon">Hz</span>
-                    <input class="form-control" type="number" min="0" id="adc_max_sampling_time" placeholder="Enter a maximum sampling time.">
-                    <span class="input-group-addon">sec</span>
+                    <div class="col-sm-7">
+                      <input class="form-control" type="number" min="0" id="adc_max_sampling_frequency" placeholder="Enter a maximum sampling frequency.">
+                    </div>
+                    <label class="col-sm-1 col-form-label">Hz</label>
+                    <div class="col-sm-4"> </div>
+                    <div class="col-sm-7">
+                      <input class="form-control" type="number" min="0" id="adc_max_sampling_time" placeholder="Enter a maximum sampling time.">
+                    </div>
+                    <label class="col-sm-1 col-form-label">sec</label>
                   </div>
-                  <br>
                 </div>
               </div>
 
