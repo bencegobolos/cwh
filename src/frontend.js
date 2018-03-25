@@ -84,7 +84,7 @@ function execute_timer_application() {
   $("#timer_result_placeholder, #timer_result_success, #timer_result_failure").hide();
 
   if ( result.system_clock > 0 ) {
-    document.getElementById("timer_result_timer_reload_value").innerHTML = "0x" + decimalToHex(Math.ceil(result.result_reload_value), 4) + " ( " + Math.ceil(result.result_reload_value) + " )";
+    document.getElementById("timer_result_timer_reload_value").innerHTML = "0x" + decimalToHex(result.result_reload_value, 4) + " ( " + result.result_reload_value + " )";
     document.getElementById("timer_result_system_clock").innerHTML = result.system_clock + " Hz";
     document.getElementById("timer_result_timer_module").innerHTML = result.timer_module.name;
     document.getElementById("timer_result_timer_clock_source").innerHTML = result.timer_clock_source;
@@ -162,7 +162,7 @@ function execute_uart_application() {
   $("#uart_result_placeholder, #uart_result_success, #uart_result_failure").hide();
 
   if (result.system_clock > 0) {
-    document.getElementById("uart_result_timer_reload_value").innerHTML = "0x" + decimalToHex(Math.ceil(result.result_reload_value), 4) + " ( " + Math.ceil(result.result_reload_value) + " )";
+    document.getElementById("uart_result_timer_reload_value").innerHTML = "0x" + decimalToHex(result.result_reload_value, 4) + " ( " + result.result_reload_value + " )";
     document.getElementById("uart_result_system_clock").innerHTML = result.system_clock + " Hz";
     document.getElementById("uart_result_timer_module").innerHTML = result.timer_module.name;
     document.getElementById("uart_result_timer_clock_source").innerHTML = result.timer_clock_source;
@@ -223,7 +223,7 @@ function print_module_usage(mcu, usage) {
   module_usage_element.id = module_usage_id;
   addText(module_usage_element, "System clock: " + usage.result.system_clock + " <br> " +
     "Timer module: " + usage.result.timer_module.name + " <br> " +
-    "Reload value: " + "0x" + decimalToHex(Math.ceil(usage.result.result_reload_value), 4) + " <br> " +
+    "Reload value: " + "0x" + decimalToHex(usage.result.result_reload_value, 4) + " <br> " +
     "Timer clock source: " + usage.result.timer_clock_source + " <br> " +
     "Timer mode: " + usage.result.timer_mode + " <br> "
   );

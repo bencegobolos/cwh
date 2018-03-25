@@ -27,7 +27,11 @@ var Timer2 = {
   interrupt_name : "INT_TIMER2",
   interrupt_flag_delete : "TF2 = 0;",
   interrupt_enable_bit : "IE = 0xA0;",
-  control : "TMR2CN"
+  control : "TMR2CN",
+  low_reg : "TMR2L",
+  high_reg : "TMR2H",
+  reload_low_reg : "TMR2RLL",
+  reload_high_reg : "TMR2RLH"
 };
 
 var Timer3 = {
@@ -37,7 +41,11 @@ var Timer3 = {
   interrupt_name : "INT_TIMER3",
   interrupt_flag_delete : "TMR3CN &= 7F;",
   interrupt_enable_bit : "EIE1 = 0x80; IE = 0x80;",
-  control : "TMR3CN"
+  control : "TMR3CN",
+  low_reg : "TMR3L",
+  high_reg : "TMR3H",
+  reload_low_reg : "TMR3RLL",
+  reload_high_reg : "TMR3RLH"
 };
 
 var ADC = {

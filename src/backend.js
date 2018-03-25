@@ -38,11 +38,12 @@ function executeTimerOverflow(mcu_name, overflow_frequency, sysclk, timer_module
           // Strategy to save the result. Another strategies could go here.
           if (result.reload_value >= 0 && result.divisor < 256) {
             results.push({
+              "overflow_frequency" : overflow_frequency,
               "system_clock" : system_clock,
               "timer_module" : timer_module,
               "timer_clock_source" : timer_clock_source,
               "timer_mode" : timer_mode,
-              "result_reload_value" : result.reload_value,
+              "result_reload_value" : Math.ceil(result.reload_value),
               "result_goodness" : result.goodness,
               "result_divisor" : result.divisor
             });
@@ -271,13 +272,15 @@ void intHandler(void) __interrupt " + timer_setup_result.timer_module.interrupt_
     divisor--;\n\
     if (!divisor) {\n\
         divisor = " + timer_setup_result.result_divisor + ";\n\n\
-        // Paste your code here.\n\n\
+        /* Paste your code here. */\n\
+        /* This code will be executed at " + timer_setup_result.overflow_frequency + " Hz. */\n\n\
     }\n\
 }\n\n";
   } else {
     return "\
 void intHandler(void) __interrupt " + timer_setup_result.timer_module.interrupt_name + " {\n\n\
-    // Paste your code here.\n\n\
+    /* Paste your code here. */\n\
+    /* This code will be executed at " + timer_setup_result.overflow_frequency + " Hz. */\n\n\
 }\n\n";
   }
 }
@@ -291,7 +294,7 @@ function get_timer_code(timer_setup_result) {
   var timer_code = "";
 
   // Add metadata.
-  timer_code += "/* Automatically generated code for setting timer module of C8051F41x MCU. */\n\n";
+  timer_code += "/* Automatically generated code for setting timer module of C8051F410 MCU. */\n\n";
 
   // Include header file.
   timer_code += "#include \"C8051F410.h\"\n\n";
@@ -303,13 +306,29 @@ void Timer_Init() {\n";
     switch (timer_setup_result.timer_module.name) {
       case TIMER0:
         timer_code += "    " + timer_setup_result.timer_module.control + " = 0x02;\n";
+        timer_code += "    TCON = 0x10;\n";
+        // TODO(bgobolos): Support Timer0 8 bit reload mode.
         break;
       case TIMER1:
         timer_code += "    " + timer_setup_result.timer_module.control + " = 0x20;\n";
+        timer_code += "    TCON = 0x40;\n";
+        // TODO(bgobolos): Support Timer1 8 bit reload mode.
         break;
       case TIMER2:
       case TIMER3:
-        timer_code += "    " + timer_setup_result.timer_module.control + " = 0x08;\n";
+        timer_code += "    " + timer_setup_result.timer_module.control + " = 0x0C;\n";
+        // TODO(bgobolos): Support Timer2 and Timer3 8 bit reload mode.
+        break;
+    }
+  } else if (timer_setup_result.timer_mode === autoReload16Bit) {
+    switch (timer_setup_result.timer_module.name) {
+      case TIMER2:
+      case TIMER3:
+        timer_code += "    " + timer_setup_result.timer_module.control + " = 0x04;\n";
+        timer_code += "    " + timer_setup_result.timer_module.reload_low_reg + " = 0x" + decimalToHex(timer_setup_result.result_reload_value, 4).substring(2,4) + ";\n";
+        timer_code += "    " + timer_setup_result.timer_module.reload_high_reg + " = 0x" + decimalToHex(timer_setup_result.result_reload_value, 4).substring(0,2) + ";\n";
+        timer_code += "    " + timer_setup_result.timer_module.low_reg + " = 0x" + decimalToHex(timer_setup_result.result_reload_value, 4).substring(2,4) + ";\n";
+        timer_code += "    " + timer_setup_result.timer_module.high_reg + " = 0x" + decimalToHex(timer_setup_result.result_reload_value, 4).substring(0,2) + ";\n";
         break;
     }
   }
@@ -380,109 +399,9 @@ void Init_Device(void) {\n\
 void main() {\n\
     Init_Device();\n\
     while (1) {\n\n\
-        // Paste your code here.\n\n\
+        /* Paste your code here. */\n\n\
     }\n\
 }\n";
 
   return timer_code;
-}
-
-function get_adc_code(adc_setup_result) {
-  var adc_code = "";
-
-  // Add metadata.
-  adc_code += "/* Automatically generated code for setting timer module of C8051F41x MCU. */\n\n";
-
-  // Include header file.
-  adc_code += "#include \"C8051F410.h\"\n\n";
-
-  // Timer init.
-  adc_code += "\
-void Timer_Init() {\n";
-  if (timer_setup_result.timer_mode === autoReload8Bit) {
-    switch (timer_setup_result.timer_module.name) {
-      case TIMER0:
-        adc_code += "    " + timer_setup_result.timer_module.control + " = 0x02;\n";
-        break;
-      case TIMER1:
-        adc_code += "    " + timer_setup_result.timer_module.control + " = 0x20;\n";
-        break;
-      case TIMER2:
-      case TIMER3:
-        adc_code += "    " + timer_setup_result.timer_module.control + " = 0x08;\n";
-        break;
-    }
-  }
-  switch (timer_setup_result.timer_clock_source) {
-    case 1:
-      switch (timer_setup_result.timer_module.name) {
-        case TIMER0:
-          adc_code += "    CKCON = 0x04;\n";
-          break;
-        case TIMER1:
-          adc_code += "    CKCON = 0x08;\n";
-          break;
-        case TIMER2:
-          adc_code += "    CKCON = 0x10;\n";
-          break;
-        case TIMER3:
-          adc_code += "    CKCON = 0x40;\n";
-          break;
-      }
-      break;
-    case 4:
-      switch (timer_setup_result.timer_module.name) {
-        case TIMER0:
-        case TIMER1:
-          adc_code += "    CKCON = 0x01;\n";
-          break;
-      }
-      break;
-
-    case 12:
-      // Default setup, no additional code is necessary.
-      break;
-
-    case 48:
-      switch (timer_setup_result.timer_module.name) {
-        case TIMER0:
-        case TIMER1:
-          adc_code += "    CKCON = 0x02;\n";
-          break;
-      }
-      break;
-
-    default:
-      console.log("Invalid timer clock source. Stopping code generation.");
-      return;
-  }
-  adc_code += "}\n\n";
-
-  // Oscillator init.
-  adc_code += get_oscillator_code(timer_setup_result);
-
-  // Interrupt init.
-  adc_code += "void Interrupts_Init() {\n    " + timer_setup_result.timer_module.interrupt_enable_bit + "\n}\n\n";
-
-  // Interrupt handler.
-  adc_code += get_timer_interrupt_code(timer_setup_result);
-
-  // Device init.
-  adc_code += "\
-void Init_Device(void) {\n\
-    Timer_Init();\n\
-    Oscillator_Init();\n\
-    Interrupts_Init();\n\
-}\n\n";
-
-  // Main.
-  adc_code += "\
-void main() {\n\
-    Init_Device();\n\
-    while (1) {\n\n\
-        // Paste your code here.\n\n\
-    }\n\
-}\n";
-
-  return adc_code;
 }
