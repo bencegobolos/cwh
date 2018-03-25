@@ -52,6 +52,7 @@ function executeTimerOverflow(mcu_name, overflow_frequency, sysclk, timer_module
     }
   }
   var result_settings = _.max(_.first(_.toArray(_.groupBy(results, "result_divisor"))), "result_goodness");
+
   return result_settings;
 }
 
@@ -258,4 +259,230 @@ function getMcu(mcu_list, mcu_name) {
   }
   // No mcu has been found with the name: mcu_name.
   return undefined;
+}
+
+/* TODO(bgobolos): use format string instead. */
+function get_timer_interrupt_code(timer_setup_result) {
+  if (timer_setup_result.result_divisor > 1) {
+    return "\
+void intHandler(void) __interrupt " + timer_setup_result.timer_module.interrupt_name + " {\n\
+    static unsigned char divisor = " + timer_setup_result.result_divisor + ";\n\
+    " + timer_setup_result.timer_module.interrupt_flag_delete + "\n\
+    divisor--;\n\
+    if (!divisor) {\n\
+        divisor = " + timer_setup_result.result_divisor + ";\n\n\
+        // Paste your code here.\n\n\
+    }\n\
+}\n\n";
+  } else {
+    return "\
+void intHandler(void) __interrupt " + timer_setup_result.timer_module.interrupt_name + " {\n\n\
+    // Paste your code here.\n\n\
+}\n\n";
+  }
+}
+
+function get_oscillator_code(result) {
+  var sysclk_multiplier = 7 - Math.round(Math.log(24500000/result.system_clock) / Math.log(2));
+  return "void Oscillator_Init() {\n    OSCICN = 0x8" + sysclk_multiplier + ";\n}\n\n";
+}
+
+function get_timer_code(timer_setup_result) {
+  var timer_code = "";
+
+  // Add metadata.
+  timer_code += "/* Automatically generated code for setting timer module of C8051F41x MCU. */\n\n";
+
+  // Include header file.
+  timer_code += "#include \"C8051F410.h\"\n\n";
+
+  // Timer init.
+  timer_code += "\
+void Timer_Init() {\n";
+  if (timer_setup_result.timer_mode === autoReload8Bit) {
+    switch (timer_setup_result.timer_module.name) {
+      case TIMER0:
+        timer_code += "    " + timer_setup_result.timer_module.control + " = 0x02;\n";
+        break;
+      case TIMER1:
+        timer_code += "    " + timer_setup_result.timer_module.control + " = 0x20;\n";
+        break;
+      case TIMER2:
+      case TIMER3:
+        timer_code += "    " + timer_setup_result.timer_module.control + " = 0x08;\n";
+        break;
+    }
+  }
+  switch (timer_setup_result.timer_clock_source) {
+    case 1:
+      switch (timer_setup_result.timer_module.name) {
+        case TIMER0:
+          timer_code += "    CKCON = 0x04;\n";
+          break;
+        case TIMER1:
+          timer_code += "    CKCON = 0x08;\n";
+          break;
+        case TIMER2:
+          timer_code += "    CKCON = 0x10;\n";
+          break;
+        case TIMER3:
+          timer_code += "    CKCON = 0x40;\n";
+          break;
+      }
+      break;
+    case 4:
+      switch (timer_setup_result.timer_module.name) {
+        case TIMER0:
+        case TIMER1:
+          timer_code += "    CKCON = 0x01;\n";
+          break;
+      }
+      break;
+
+    case 12:
+      // Default setup, no additional code is necessary.
+      break;
+
+    case 48:
+      switch (timer_setup_result.timer_module.name) {
+        case TIMER0:
+        case TIMER1:
+          timer_code += "    CKCON = 0x02;\n";
+          break;
+      }
+      break;
+
+    default:
+      console.log("Invalid timer clock source. Stopping code generation.");
+      return;
+  }
+  timer_code += "}\n\n";
+
+  // Oscillator init.
+  timer_code += get_oscillator_code(timer_setup_result);
+
+  // Interrupt init.
+  timer_code += "void Interrupts_Init() {\n    " + timer_setup_result.timer_module.interrupt_enable_bit + "\n}\n\n";
+
+  // Interrupt handler.
+  timer_code += get_timer_interrupt_code(timer_setup_result);
+
+  // Device init.
+  timer_code += "\
+void Init_Device(void) {\n\
+    Timer_Init();\n\
+    Oscillator_Init();\n\
+    Interrupts_Init();\n\
+}\n\n";
+
+  // Main.
+  timer_code += "\
+void main() {\n\
+    Init_Device();\n\
+    while (1) {\n\n\
+        // Paste your code here.\n\n\
+    }\n\
+}\n";
+
+  return timer_code;
+}
+
+function get_adc_code(adc_setup_result) {
+  var adc_code = "";
+
+  // Add metadata.
+  adc_code += "/* Automatically generated code for setting timer module of C8051F41x MCU. */\n\n";
+
+  // Include header file.
+  adc_code += "#include \"C8051F410.h\"\n\n";
+
+  // Timer init.
+  adc_code += "\
+void Timer_Init() {\n";
+  if (timer_setup_result.timer_mode === autoReload8Bit) {
+    switch (timer_setup_result.timer_module.name) {
+      case TIMER0:
+        adc_code += "    " + timer_setup_result.timer_module.control + " = 0x02;\n";
+        break;
+      case TIMER1:
+        adc_code += "    " + timer_setup_result.timer_module.control + " = 0x20;\n";
+        break;
+      case TIMER2:
+      case TIMER3:
+        adc_code += "    " + timer_setup_result.timer_module.control + " = 0x08;\n";
+        break;
+    }
+  }
+  switch (timer_setup_result.timer_clock_source) {
+    case 1:
+      switch (timer_setup_result.timer_module.name) {
+        case TIMER0:
+          adc_code += "    CKCON = 0x04;\n";
+          break;
+        case TIMER1:
+          adc_code += "    CKCON = 0x08;\n";
+          break;
+        case TIMER2:
+          adc_code += "    CKCON = 0x10;\n";
+          break;
+        case TIMER3:
+          adc_code += "    CKCON = 0x40;\n";
+          break;
+      }
+      break;
+    case 4:
+      switch (timer_setup_result.timer_module.name) {
+        case TIMER0:
+        case TIMER1:
+          adc_code += "    CKCON = 0x01;\n";
+          break;
+      }
+      break;
+
+    case 12:
+      // Default setup, no additional code is necessary.
+      break;
+
+    case 48:
+      switch (timer_setup_result.timer_module.name) {
+        case TIMER0:
+        case TIMER1:
+          adc_code += "    CKCON = 0x02;\n";
+          break;
+      }
+      break;
+
+    default:
+      console.log("Invalid timer clock source. Stopping code generation.");
+      return;
+  }
+  adc_code += "}\n\n";
+
+  // Oscillator init.
+  adc_code += get_oscillator_code(timer_setup_result);
+
+  // Interrupt init.
+  adc_code += "void Interrupts_Init() {\n    " + timer_setup_result.timer_module.interrupt_enable_bit + "\n}\n\n";
+
+  // Interrupt handler.
+  adc_code += get_timer_interrupt_code(timer_setup_result);
+
+  // Device init.
+  adc_code += "\
+void Init_Device(void) {\n\
+    Timer_Init();\n\
+    Oscillator_Init();\n\
+    Interrupts_Init();\n\
+}\n\n";
+
+  // Main.
+  adc_code += "\
+void main() {\n\
+    Init_Device();\n\
+    while (1) {\n\n\
+        // Paste your code here.\n\n\
+    }\n\
+}\n";
+
+  return adc_code;
 }

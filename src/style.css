@@ -1,13 +1,5 @@
-#application_div, #result, #SetAdcC8051F410, #select_mcu, #SetUARTFromRestrictions, #result_timer_interrupt_code_div, #SetUARTC8051F410, #ResultUARTC8051F410, #save_module_usage, #DeleteTimer1Usage, #ResultAdcC8051F410, #SetADCFromRestrictions {
+#timer_application_form_div, #uart_application_form_div, #adc_application_form_div, #timer_application_settings, #uart_application_settings, #adc_application_settings {
   display: none;
-}
-
-#restrictions_button {
-  text-decoration: underline;
-}
-
-#restrictions_button:hover {
-  background-color: #A5A5A5;
 }
 
 #Settings > label {
@@ -15,4 +7,17 @@
   clear: both;
   float:left;
   margin-right:15px;
+}
+
+.navbar-default {
+  background: #cfd8dc !important;
+}
+.col-form-label {
+  padding-top: 7px !important;
+}
+.rest {
+  margin: 20px 0 10px 0 !important;
+}
+.unit {
+  text-align: right;
 }

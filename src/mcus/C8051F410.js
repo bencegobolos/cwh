@@ -5,7 +5,9 @@ var Timer0 = {
   clock_sources : [4, 12, 48],
   modes : [autoReload8Bit],
   interrupt_name : "INT_TIMER0",
-  interrupt_flag_delete : "TF0 = 0;"
+  interrupt_flag_delete : "TF0 = 0;",
+  interrupt_enable_bit : "IE = 0x82;",
+  control : "TMOD"
 };
 
 var Timer1 = {
@@ -13,7 +15,9 @@ var Timer1 = {
   clock_sources : [1, 4, 12, 48],
   modes : [autoReload8Bit],
   interrupt_name : "INT_TIMER1",
-  interrupt_flag_delete : "TF1 = 0;"
+  interrupt_flag_delete : "TF1 = 0;",
+  interrupt_enable_bit : "IE = 0x88;",
+  control : "TMOD"
 };
 
 var Timer2 = {
@@ -21,7 +25,9 @@ var Timer2 = {
   clock_sources : [1, 12],
   modes : [autoReload16Bit, autoReload8Bit],
   interrupt_name : "INT_TIMER2",
-  interrupt_flag_delete : "TF2 = 0;"
+  interrupt_flag_delete : "TF2 = 0;",
+  interrupt_enable_bit : "IE = 0xA0;",
+  control : "TMR2CN"
 };
 
 var Timer3 = {
@@ -29,33 +35,20 @@ var Timer3 = {
   clock_sources : [1, 12],
   modes : [autoReload16Bit, autoReload8Bit],
   interrupt_name : "INT_TIMER3",
-  interrupt_flag_delete : "TMR3CN &= 7F;"
+  interrupt_flag_delete : "TMR3CN &= 7F;",
+  interrupt_enable_bit : "EIE1 = 0x80; IE = 0x80;",
+  control : "TMR3CN"
+};
+
+var ADC = {
+  name : "ADC"
 };
 
 var C8051F410 = {
   name : "C8051F410",
   system_clocks : [191406, 382813, 765625, 1531250, 3062500, 6125000, 12250000, 24500000],
   timer_modules : [Timer0, Timer1, Timer2, Timer3],
-  set_modules : [],
-
-  saveModuleUsage : function(module, app, result) {
-    this.set_modules[module.name] = {
-      app : app,
-      result: result
-    };
-    console.log("Usage of " + module.name + " has been saved by " + app + ".");
-  },
-
-  isModuleUsed : function(module_name) {
-    var module_obj = this.getTimerModule(module_name);
-    if (this.set_modules[module_obj.name] == undefined) {
-      // Module is not used.
-      return 0;
-    } else {
-      // Module is used.
-      return 1;
-    }
-  },
+  adc_modules : [ADC],
 
   getTimerModule : function(timer_module_name) {
     for (var x in this.timer_modules) {
