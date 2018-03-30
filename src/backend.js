@@ -43,7 +43,7 @@ function executeTimerOverflow(mcu_name, overflow_frequency, sysclk, timer_module
               "timer_module" : timer_module,
               "timer_clock_source" : timer_clock_source,
               "timer_mode" : timer_mode,
-              "result_reload_value" : Math.ceil(result.reload_value),
+              "result_reload_value" : Math.round(result.reload_value),
               "result_goodness" : result.goodness,
               "result_divisor" : result.divisor
             });
@@ -141,7 +141,7 @@ function calculateUART(mcu_name, bit_per_sec, sysclk, accuracy) {
 
   var result_settings = executeTimerOverflow(mcu.name, bit_per_sec*2, system_clocks, "Timer1");
 
-  result_settings.bit_per_sec = calculateRealFrequency(Math.round(result_settings.result_reload_value), result_settings.system_clock, result_settings.timer_clock_source,result_settings.timer_mode) / 2;
+  result_settings.bit_per_sec = calculateRealFrequency(result_settings.result_reload_value, result_settings.system_clock, result_settings.timer_clock_source,result_settings.timer_mode) / 2;
   result_settings.accuracy = Math.abs((result_settings.bit_per_sec-bit_per_sec)/(result_settings.bit_per_sec+bit_per_sec))*100;
 
   return result_settings;
@@ -176,11 +176,11 @@ function calculateRealFrequency(reload_value, sysclk, timer_clock_source, timer_
  SAR clock cycles plus an additional 2 FCLK cycles to start and complete a conversion.
  */
 
-function calculateAdc(mcu, sysclk, R, max_sampling_time) {
+function calculateAdc(mcu_name, sysclk, R, max_sampling_time) {
 
-  var minimum_track_time = (R / 1000) * 0.00000011 + 0.00000054;
+  var minimum_tracking_time = (R / 1000) * 0.00000011 + 0.00000054;
   var sar_multipliers = [2, 4, 8, 16];
-  var mcu = getMcu(mcu_list, mcu);
+  var mcu = getMcu(mcu_list, mcu_name);
 
   // Optional parameters.
   var system_clocks;
@@ -197,20 +197,39 @@ function calculateAdc(mcu, sysclk, R, max_sampling_time) {
 
   for (var l = 0; l < system_clocks.length; ++l) {
     var system_clock = system_clocks[l];
+    // TODO(bgobolos): if minimum tracking time is high (big resistance value) then slow down sar clock.
     var AD0SC = getAD0SC(system_clock);
     var sar_clock = system_clock / (AD0SC + 1);
     var conversion_time = 13 * (1 / sar_clock) + 2 * (1/system_clock);
     for (var j = 0; j < sar_multipliers.length; ++j) {
       var sar_multiplier = sar_multipliers[j];
       var post_tracking_time = getPostTrackingTime(system_clock, sar_clock, sar_multiplier);
-      if (minimum_track_time <= post_tracking_time && conversion_time+post_tracking_time < max_sampling_time) {
+      var ptt_plus_conv_time = post_tracking_time + conversion_time;
+      // Calculate timer2 usage to drive the ADC module with 10% idling time after conversion (post tracking mode).
+      var timer_result = executeTimerOverflow(mcu_name, Math.floor(1/(ptt_plus_conv_time))*0.9, system_clock, TIMER2);
+      timer_result.result_frequency = calculateRealFrequency(timer_result.result_reload_value, timer_result.system_clock, timer_result.timer_clock_source,timer_result.timer_mode);
+
+      var idle_time = 1/timer_result.result_frequency - ptt_plus_conv_time;
+
+      if (minimum_tracking_time <= post_tracking_time && ptt_plus_conv_time < max_sampling_time &&
+          1/timer_result.result_frequency < max_sampling_time && 1/timer_result.result_frequency >= minimum_tracking_time &&
+         timer_result.result_divisor === 1 && idle_time > 0) {
         results.push({
           "system_clock" : system_clock,
           "sar_clock" : sar_clock,
           "ad0sc" : AD0SC,
           "sar_multiplier" : sar_multiplier,
           "post_tracking_time" : post_tracking_time,
-          "conversion_time" : conversion_time
+          "conversion_time" : conversion_time,
+          "minimum_tracking_time" : minimum_tracking_time,
+          "overflow_frequency" : timer_result.overflow_frequency,
+          "timer_module" : timer_result.timer_module,
+          "timer_clock_source" : timer_result.timer_clock_source,
+          "timer_mode" : timer_result.timer_mode,
+          "result_reload_value" : timer_result.result_reload_value,
+          "result_divisor" : timer_result.result_divisor,
+          "result_frequency" : timer_result.result_frequency,
+          "idle_time" : idle_time
         });
       }
     }

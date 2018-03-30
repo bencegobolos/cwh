@@ -182,16 +182,22 @@ function execute_adc_application() {
   var system_clock = document.getElementById("adc_application_system_clock").value;
   var max_sampling_time = (1 / document.getElementById("adc_max_sampling_frequency").value);
 
-  var minimum_track_time = (R / 1000) * 0.00000011 + 0.00000054;
-
   var result = calculateAdc(mcu_name, system_clock, R, max_sampling_time);
 
   $("#adc_result_placeholder, #adc_result_success, #adc_result_failure").hide();
 
   if (result.system_clock > 0) {
     document.getElementById("adc_result_system_clock").innerHTML = result.system_clock + " Hz";
+    document.getElementById("adc_result_timer_reload_value").innerHTML = "0x" + decimalToHex(result.result_reload_value, 4) + " ( " + result.result_reload_value + " )";
+    document.getElementById("adc_result_system_clock").innerHTML = result.system_clock + " Hz";
+    document.getElementById("adc_result_timer_module").innerHTML = result.timer_module.name;
+    document.getElementById("adc_result_timer_clock_source").innerHTML = result.timer_clock_source;
+    document.getElementById("adc_result_timer_mode").innerHTML = result.timer_mode;
     document.getElementById("adc_result_ad0sc").innerHTML = result.ad0sc + " ( " + Math.round(result.sar_clock * 100) / 100 + " Hz )";
     document.getElementById("adc_result_sar_multiplier").innerHTML = result.sar_multiplier;
+    document.getElementById("adc_result_minimum_tracking_time").innerHTML = result.minimum_tracking_time;
+    document.getElementById("adc_result_post_tracking_time").innerHTML = result.post_tracking_time;
+    document.getElementById("adc_result_conversion_time").innerHTML = result.conversion_time;
 
     $("#adc_result_success").show();
   } else {
