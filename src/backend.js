@@ -326,12 +326,12 @@ void Timer_Init() {\n";
       case TIMER0:
         timer_code += "    " + timer_setup_result.timer_module.control + " = 0x02;\n";
         timer_code += "    TCON = 0x10;\n";
-        // TODO(bgobolos): Support Timer0 8 bit reload mode.
+        timer_code += "    " + timer_setup_result.timer_module.high_reg + " = 0x" + decimalToHex(timer_setup_result.result_reload_value, 4).substring(2,4) + ";\n";
         break;
       case TIMER1:
         timer_code += "    " + timer_setup_result.timer_module.control + " = 0x20;\n";
         timer_code += "    TCON = 0x40;\n";
-        // TODO(bgobolos): Support Timer1 8 bit reload mode.
+        timer_code += "    " + timer_setup_result.timer_module.high_reg + " = 0x" + decimalToHex(timer_setup_result.result_reload_value, 4).substring(2,4) + ";\n";
         break;
       case TIMER2:
       case TIMER3:

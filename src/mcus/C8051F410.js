@@ -7,6 +7,7 @@ var Timer0 = {
   interrupt_name : "INT_TIMER0",
   interrupt_flag_delete : "TF0 = 0;",
   interrupt_enable_bit : "IE = 0x82;",
+  high_reg : "TH0",
   control : "TMOD"
 };
 
@@ -17,6 +18,7 @@ var Timer1 = {
   interrupt_name : "INT_TIMER1",
   interrupt_flag_delete : "TF1 = 0;",
   interrupt_enable_bit : "IE = 0x88;",
+  high_reg : "TH1",
   control : "TMOD"
 };
 
