@@ -336,8 +336,9 @@ void Timer_Init() {\n";
         break;
       case TIMER2:
       case TIMER3:
-        timer_code += "    " + timer_setup_result.timer_module.control + " = 0x0C;\n";
-        // TODO(bgobolos): Support Timer2 and Timer3 8 bit reload mode.
+        timer_code += "    " + timer_setup_result.timer_module.control + " = 0x28;\n";
+        timer_code += "    " + timer_setup_result.timer_module.low_reg + " = 0x" + decimalToHex(timer_setup_result.result_reload_value, 4).substring(2,4) + ";\n";
+        timer_code += "    " + timer_setup_result.timer_module.reload_low_reg + " = 0x" + decimalToHex(timer_setup_result.result_reload_value, 4).substring(2,4) + ";\n";
         break;
     }
   } else if (timer_setup_result.timer_mode === autoReload16Bit) {
