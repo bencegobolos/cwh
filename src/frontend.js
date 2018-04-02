@@ -79,7 +79,7 @@ function execute_timer_application() {
     document.getElementById("timer_result_timer_reload_value").innerHTML = "0x" + decimalToHex(result.result_reload_value, 4) + " ( " + result.result_reload_value + " )";
     document.getElementById("timer_result_system_clock").innerHTML = result.system_clock + " Hz";
     document.getElementById("timer_result_timer_module").innerHTML = result.timer_module.name;
-    document.getElementById("timer_result_timer_clock_source").innerHTML = result.timer_clock_source;
+    document.getElementById("timer_result_timer_clock_source").innerHTML = "SYSCLK / " + result.timer_clock_source;
     document.getElementById("timer_result_timer_mode").innerHTML = result.timer_mode;
     document.getElementById("timer_result_timer_interrupt_code").innerHTML = get_timer_code(result);
 
@@ -103,7 +103,7 @@ function execute_uart_application() {
     document.getElementById("uart_result_timer_reload_value").innerHTML = "0x" + decimalToHex(result.result_reload_value, 4) + " ( " + result.result_reload_value + " )";
     document.getElementById("uart_result_system_clock").innerHTML = result.system_clock + " Hz";
     document.getElementById("uart_result_timer_module").innerHTML = result.timer_module.name;
-    document.getElementById("uart_result_timer_clock_source").innerHTML = result.timer_clock_source;
+    document.getElementById("uart_result_timer_clock_source").innerHTML = "SYSCLK / " + result.timer_clock_source;
     document.getElementById("uart_result_timer_mode").innerHTML = result.timer_mode;
     document.getElementById("uart_result_bit_per_sec").innerHTML = result.bit_per_sec.toFixed(0);
     document.getElementById("uart_result_accuracy").innerHTML = result.accuracy.toFixed(3) + " %";
@@ -129,7 +129,7 @@ function execute_adc_application() {
     document.getElementById("adc_result_timer_reload_value").innerHTML = "0x" + decimalToHex(result.result_reload_value, 4) + " ( " + result.result_reload_value + " )";
     document.getElementById("adc_result_system_clock").innerHTML = result.system_clock + " Hz";
     document.getElementById("adc_result_timer_module").innerHTML = result.timer_module.name;
-    document.getElementById("adc_result_timer_clock_source").innerHTML = result.timer_clock_source;
+    document.getElementById("adc_result_timer_clock_source").innerHTML = "SYSCLK / " + result.timer_clock_source;
     document.getElementById("adc_result_timer_mode").innerHTML = result.timer_mode;
     document.getElementById("adc_result_ad0sc").innerHTML = result.ad0sc + " ( " + Math.round(result.sar_clock * 100) / 100 + " Hz )";
     document.getElementById("adc_result_sar_multiplier").innerHTML = result.sar_multiplier;
