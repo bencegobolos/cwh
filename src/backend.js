@@ -297,7 +297,8 @@ void intHandler(void) __interrupt " + timer_setup_result.timer_module.interrupt_
 }\n\n";
   } else {
     return "\
-void intHandler(void) __interrupt " + timer_setup_result.timer_module.interrupt_name + " {\n\n\
+void intHandler(void) __interrupt " + timer_setup_result.timer_module.interrupt_name + " {\n\
+    " + timer_setup_result.timer_module.interrupt_flag_delete  + "\n\n\
     /* Paste your code here. */\n\
     /* This code will be executed at " + timer_setup_result.overflow_frequency + " Hz. */\n\n\
 }\n\n";
