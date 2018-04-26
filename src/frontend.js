@@ -85,6 +85,7 @@ function execute_timer_application() {
 
     $("#timer_result_success").show();
   } else {
+    document.getElementById("timer_result_failure").innerHTML = result.message;
     $("#timer_result_failure").show();
   }
 }
@@ -110,6 +111,7 @@ function execute_uart_application() {
 
     $("#uart_result_success").show();
   } else {
+    document.getElementById("uart_result_failure").innerHTML = result.message;
     $("#uart_result_failure").show();
   }
 }
@@ -133,23 +135,15 @@ function execute_adc_application() {
     document.getElementById("adc_result_timer_mode").innerHTML = result.timer_mode;
     document.getElementById("adc_result_ad0sc").innerHTML = result.ad0sc + " ( " + Math.round(result.sar_clock * 100) / 100 + " Hz )";
     document.getElementById("adc_result_sar_multiplier").innerHTML = result.sar_multiplier;
-    document.getElementById("adc_result_minimum_tracking_time").innerHTML = result.minimum_tracking_time;
-    document.getElementById("adc_result_post_tracking_time").innerHTML = result.post_tracking_time;
-    document.getElementById("adc_result_conversion_time").innerHTML = result.conversion_time;
+    document.getElementById("adc_result_minimum_tracking_time").innerHTML = result.minimum_tracking_time.toExponential(3) + " sec";
+    document.getElementById("adc_result_post_tracking_time").innerHTML = result.post_tracking_time.toExponential(3) + " sec";
+    document.getElementById("adc_result_conversion_time").innerHTML = result.conversion_time.toExponential(3) + " sec";
 
     $("#adc_result_success").show();
   } else {
     // All settings result in a lower tracking time than necessary.
+    document.getElementById("adc_result_failure").innerHTML = result.message;
     $("#adc_result_failure").show();
 
   }
-}
-
-function notify(message, type) {
-  var notification_div = $("#notification_div");
-  document.getElementById("notification").innerHTML = message;
-  notification_div.removeClass();
-  notification_div.addClass("alert");
-  notification_div.addClass("alert-" + type);
-  notification_div.show(0).fadeOut(5000);
 }

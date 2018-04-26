@@ -52,7 +52,19 @@ function executeTimerOverflow(mcu_name, overflow_frequency, sysclk, timer_module
       }
     }
   }
-  var result_settings = _.max(_.first(_.toArray(_.groupBy(results, "result_divisor"))), "result_goodness");
+
+  // Compose additional message if there is no result or save the best one.
+  var result_settings = {};
+  if (results.length === 0) {
+    result_settings.message = "Could not set up timer module";
+    if (sysclk == -1 && timer_module_name === "") result_settings.message += ".";
+    if (sysclk == -1 && timer_module_name !== "") result_settings.message += " with " + timer_module_name + " module.";
+    if (sysclk != -1 && timer_module_name === "") result_settings.message += " with " + sysclk + " Hz system clock.";
+    if (sysclk != -1 && timer_module_name !== "") result_settings.message += " with " + timer_module_name + " module and " + sysclk + " Hz system clock.";
+  } else {
+    result_settings = _.max(_.first(_.toArray(_.groupBy(results, "result_divisor"))), "result_goodness");
+    result_settings.message = "Timer application succeeded.";
+  }
 
   return result_settings;
 }
@@ -141,8 +153,21 @@ function calculateUART(mcu_name, bit_per_sec, sysclk, accuracy) {
 
   var result_settings = executeTimerOverflow(mcu.name, bit_per_sec*2, system_clocks, "Timer1");
 
-  result_settings.bit_per_sec = calculateRealFrequency(result_settings.result_reload_value, result_settings.system_clock, result_settings.timer_clock_source,result_settings.timer_mode) / 2;
-  result_settings.accuracy = Math.abs((result_settings.bit_per_sec-bit_per_sec)/(result_settings.bit_per_sec+bit_per_sec))*100;
+  if (result_settings.system_clock === undefined || result_settings.result_divisor > 1) {
+    /* Workaround: if the result_divisor is bigger than 1, then the result is bad and have to
+       be removed from result_settings to handle the message more easily in frontend.js file. */
+    result_settings = {};
+    result_settings.message = "Could not set up Timer1 module for UART usage with " + accuracy + "% accuracy";
+    if (sysclk == -1) {
+      result_settings.message += ".";
+    } else {
+      result_settings.message += " and " + sysclk + " Hz system clock.";
+    }
+  } else {
+    result_settings.bit_per_sec = calculateRealFrequency(result_settings.result_reload_value, result_settings.system_clock, result_settings.timer_clock_source, result_settings.timer_mode) / 2;
+    result_settings.accuracy = Math.abs((result_settings.bit_per_sec - bit_per_sec) / (result_settings.bit_per_sec + bit_per_sec)) * 100;
+    result_settings.message = "UART application succeeded.";
+  }
 
   return result_settings;
 }
@@ -235,7 +260,18 @@ function calculateAdc(mcu_name, sysclk, R, max_sampling_time) {
     }
   }
 
-  var result_settings = _.max(_.last(_.toArray(_.groupBy(results, "sar_clock"))), "sar_multiplier");
+  // Compose additional message if there is no result or save the best one.
+  var result_settings = {};
+  if (results.length === 0) {
+    result_settings.message = "Could not set up ADC module";
+    if (sysclk == -1 && max_sampling_time == Number.POSITIVE_INFINITY) result_settings.message += ".";
+    if (sysclk == -1 && max_sampling_time < Number.POSITIVE_INFINITY) result_settings.message += " with " + max_sampling_time + " sec maximum sampling time.";
+    if (sysclk != -1 && max_sampling_time == Number.POSITIVE_INFINITY) result_settings.message += " with " + sysclk + " Hz system clock.";
+    if (sysclk != -1 && max_sampling_time < Number.POSITIVE_INFINITY) result_settings.message += " with " + max_sampling_time + " sec maximum sampling time and " + sysclk + " Hz system clock.";
+  } else {
+    result_settings = _.max(_.last(_.toArray(_.groupBy(results, "sar_clock"))), "sar_multiplier");
+    result_settings.message = "ADC application succeeded.";
+  }
 
   return result_settings;
 }
