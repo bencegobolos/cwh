@@ -84,11 +84,12 @@ function execute_timer_application() {
   var mcu_name = "C8051F410";
   var overflow_frequency = document.getElementById("timer_overflow_frequency").value;
   var system_clock = document.getElementById("timer_application_system_clock").value;
+  var is_external_clock = document.getElementById("timer_application_is_external_clock").checked;
   var timer_module_name = document.getElementById("timer_application_timer_module").value;
 
   var result = executeTimerOverflow(mcu_name, overflow_frequency, system_clock, timer_module_name);
 
-  $("#timer_result_placeholder, #timer_result_success, #timer_result_failure").hide();
+  $("#timer_result_placeholder, #timer_result_success, #timer_result_failure, #timer_result_timer_interrupt_code_div").hide();
 
   if ( result.system_clock > 0 ) {
     document.getElementById("timer_result_timer_reload_value").innerHTML = "0x" + decimalToHex(result.result_reload_value, 4) + " ( " + result.result_reload_value + " )";
@@ -96,7 +97,11 @@ function execute_timer_application() {
     document.getElementById("timer_result_timer_module").innerHTML = result.timer_module.name;
     document.getElementById("timer_result_timer_clock_source").innerHTML = "SYSCLK / " + result.timer_clock_source;
     document.getElementById("timer_result_timer_mode").innerHTML = result.timer_mode;
-    document.getElementById("timer_result_timer_interrupt_code").innerHTML = get_timer_code(result);
+    // TODO(bgobolos): code generation with external system clock is not supported.
+    if (!is_external_clock) {
+      document.getElementById("timer_result_timer_interrupt_code").innerHTML = get_timer_code(result);
+      $("#timer_result_timer_interrupt_code_div").show();
+    }
 
     $("#timer_result_success").show();
   } else {
@@ -109,13 +114,18 @@ function execute_uart_application() {
   var mcu_name = "C8051F410";
   var bit_per_sec = document.getElementById("uart_bit_per_sec").value;
   var uart_sysclk = document.getElementById("uart_application_system_clock").value;
+  var is_external_clock = document.getElementById("uart_application_is_external_clock").checked;
   var uart_accuracy = document.getElementById("uart_accuracy").value;
 
-  var result = calculateUART(mcu_name, bit_per_sec, uart_sysclk, uart_accuracy);
+  var result = calculateUART(mcu_name, bit_per_sec, uart_sysclk, is_external_clock, uart_accuracy);
 
   $("#uart_result_placeholder, #uart_result_success, #uart_result_failure").hide();
 
   if (result.system_clock > 0) {
+    if (!is_external_clock) {
+      document.getElementById("uart_result_placeholder").innerHTML = result.message;
+      $("#uart_result_placeholder").show();
+    }
     document.getElementById("uart_result_timer_reload_value").innerHTML = "0x" + decimalToHex(result.result_reload_value, 4) + " ( " + result.result_reload_value + " )";
     document.getElementById("uart_result_system_clock").innerHTML = result.system_clock + " Hz";
     document.getElementById("uart_result_timer_module").innerHTML = result.timer_module.name;

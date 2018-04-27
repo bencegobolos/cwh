@@ -140,20 +140,17 @@ function calculateReloadValue(overflow_frequency, timer_clock, mode) {
 // ############# UART configuration ################
 // #################################################
 
-function calculateUART(mcu_name, bit_per_sec, sysclk, accuracy) {
+function calculateUART(mcu_name, bit_per_sec, sysclk, is_external_clock, accuracy) {
   var mcu = getMcu(mcu_list, mcu_name);
+  sysclk = parseInt(sysclk);
+  bit_per_sec = parseInt(bit_per_sec);
+  accuracy = parseInt(accuracy);
 
-  // Optional parameters.
-  var system_clocks;
-  if (sysclk == -1) {
-    system_clocks = -1;
-  } else {
-    system_clocks = [sysclk];
-  }
+  var result_settings = executeTimerOverflow(mcu.name, bit_per_sec*2, sysclk, "Timer1");
+  result_settings.bit_per_sec = calculateRealFrequency(result_settings.result_reload_value, result_settings.system_clock, result_settings.timer_clock_source, result_settings.timer_mode) / 2;
+  result_settings.accuracy = Math.abs((result_settings.bit_per_sec - bit_per_sec) / (result_settings.bit_per_sec + bit_per_sec)) * 100;
 
-  var result_settings = executeTimerOverflow(mcu.name, bit_per_sec*2, system_clocks, "Timer1");
-
-  if (result_settings.system_clock === undefined || result_settings.result_divisor > 1) {
+  if (result_settings.system_clock === undefined || result_settings.result_divisor > 1 || result_settings.accuracy > accuracy) {
     /* Workaround: if the result_divisor is bigger than 1, then the result is bad and have to
        be removed from result_settings to handle the message more easily in frontend.js file. */
     result_settings = {};
@@ -164,9 +161,11 @@ function calculateUART(mcu_name, bit_per_sec, sysclk, accuracy) {
       result_settings.message += " and " + sysclk + " Hz system clock.";
     }
   } else {
-    result_settings.bit_per_sec = calculateRealFrequency(result_settings.result_reload_value, result_settings.system_clock, result_settings.timer_clock_source, result_settings.timer_mode) / 2;
-    result_settings.accuracy = Math.abs((result_settings.bit_per_sec - bit_per_sec) / (result_settings.bit_per_sec + bit_per_sec)) * 100;
-    result_settings.message = "UART application succeeded.";
+    if (!is_external_clock) {
+      result_settings.message = "Please note that internal oscillator has 2% accuracy.";
+    } else {
+      result_settings.message = "UART application succeeded.";
+    }
   }
 
   return result_settings;
