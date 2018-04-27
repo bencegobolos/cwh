@@ -50,7 +50,7 @@
               <div id="timer_application_restrictions_div" class="collapse form-group row">
                 <div id="timer_application_system_clock_div">
                   <label class="col-sm-4 col-form-label" for="timer_application_system_clock">System Clock</label>
-                  <div class="col-sm-7">
+                  <div class="col-sm-7" id="timer_application_system_clock_input_div">
                     <select class="form-control dropdown" id="timer_application_system_clock">
                       <option selected value=-1>Please select a system clock</option>
                       <option value=191406>191406</option>
@@ -64,7 +64,12 @@
                     </select>
                   </div>
                   <label class="col-sm-1 col-form-label">Hz</label>
-                  <span><input class="editOption" style="display:none;" /></span>
+
+                  <div class="col-sm-12 row" id="timer_application_is_external_clock_div">
+                    <label class="col-sm-4">Use external clock</label>
+                    <input type="checkbox" class="col-sm-1" id="timer_application_is_external_clock">
+                    <span class="col-sm-7"></span>
+                  </div>
                 </div>
                 <div id="timer_application_timer_module_div" class="form-group">
                   <label class="col-sm-4 col-form-label" for="timer_application_timer_module">Timer Module</label>
@@ -99,7 +104,7 @@
               <div id="uart_application_restrictions_div" class="collapse form-group row">
                 <div id="uart_application_system_clock_div">
                   <label class="col-sm-4 col-form-label" for="uart_application_system_clock">System Clock</label>
-                  <div class="col-sm-7">
+                  <div class="col-sm-7" id="uart_application_system_clock_input_div">
                     <select class="form-control dropdown" id="uart_application_system_clock">
                       <option selected value=-1>Please select a system clock</option>
                       <option value=191406>191406</option>
@@ -113,7 +118,12 @@
                     </select>
                   </div>
                   <label class="col-sm-1 col-form-label">Hz</label>
-                  <span><input class="editOption" style="display:none;" /></span>
+
+                  <div class="col-sm-12 row" id="uart_application_is_external_clock_div">
+                    <label class="col-sm-4">Use external clock</label>
+                    <input type="checkbox" class="col-sm-1" id="uart_application_is_external_clock">
+                    <span class="col-sm-7"></span>
+                  </div>
                   <br>
                 </div>
                 <div id="uart_accuracy_div" class="form-group">
@@ -145,7 +155,7 @@
               <div id="adc_application_restrictions_div" class="collapse form-group">
                 <div id="adc_application_system_clock_div">
                   <label class="col-sm-4 col-form-label" for="adc_application_system_clock">System Clock</label>
-                  <div class="col-sm-7">
+                  <div class="col-sm-7" id="adc_application_system_clock_input_div">
                     <select class="form-control dropdown" id="adc_application_system_clock">
                       <option selected value=-1>Please select a system clock</option>
                       <option value=191406>191406</option>
@@ -159,7 +169,12 @@
                     </select>
                   </div>
                   <label class="col-sm-1 col-form-label">Hz</label>
-                  <span><input class="editOption" style="display:none;" /></span>
+
+                  <div class="col-sm-12 row" id="adc_application_is_external_clock_div">
+                    <label class="col-sm-4">Use external clock</label>
+                    <input type="checkbox" class="col-sm-1" id="adc_application_is_external_clock">
+                    <span class="col-sm-7"></span>
+                  </div>
                   <br>
                 </div>
                 <div id="adc_max_sampling_div" class="input-group">

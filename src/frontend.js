@@ -36,6 +36,21 @@ $(document).ready(function(){
     var adc_max_sampling_time = document.getElementById("adc_max_sampling_time").value;
     document.getElementById("adc_max_sampling_frequency").value = 1 / adc_max_sampling_time;
   });
+
+  $("#timer_application_is_external_clock").on("change", function () {
+    var is_ext_clock = document.getElementById("timer_application_is_external_clock").checked;
+    switch_system_clock_type("timer", is_ext_clock);
+  });
+
+  $("#uart_application_is_external_clock").on("change", function () {
+    var is_ext_clock = document.getElementById("uart_application_is_external_clock").checked;
+    switch_system_clock_type("uart", is_ext_clock);
+  });
+
+  $("#adc_application_is_external_clock").on("change", function () {
+    var is_ext_clock = document.getElementById("adc_application_is_external_clock").checked;
+    switch_system_clock_type("adc", is_ext_clock);
+  });
 });
 
 function show_timer_application_form() {
@@ -146,4 +161,41 @@ function execute_adc_application() {
     $("#adc_result_failure").show();
 
   }
+}
+
+function switch_system_clock_type(application, is_external_clock) {
+  var div_element = document.getElementById(application + "_application_system_clock_input_div");
+  var system_clock_input_id = application + "_application_system_clock";
+  var system_clock_input_element = document.getElementById(system_clock_input_id);
+
+  if (system_clock_input_element) {
+    div_element.removeChild(system_clock_input_element);
+  }
+
+  if (is_external_clock) {
+    system_clock_input_element = document.createElement("input");
+    system_clock_input_element.id = system_clock_input_id;
+    system_clock_input_element.setAttribute("class", "form-control");
+    system_clock_input_element.setAttribute("type", "number");
+    system_clock_input_element.setAttribute("min", "0");
+    system_clock_input_element.setAttribute("placeholder", "Please enter external clock source frequency here");
+  } else {
+    system_clock_input_element = document.createElement("select");
+    system_clock_input_element.id = system_clock_input_id;
+    system_clock_input_element.setAttribute("class", "form-control dropdown");
+
+    var new_system_clock_element = document.createElement("option");
+    new_system_clock_element.setAttribute("selected","");
+    new_system_clock_element.setAttribute("value","-1" );
+    new_system_clock_element.text = "Please select a system clock";
+    system_clock_input_element.add(new_system_clock_element);
+    for (var i = 0; i < C8051F410.system_clocks.length; i++) {
+      new_system_clock_element = document.createElement("option");
+      new_system_clock_element.setAttribute("value", C8051F410.system_clocks[i]);
+      new_system_clock_element.text = C8051F410.system_clocks[i];
+      system_clock_input_element.add(new_system_clock_element);
+    }
+  }
+
+  div_element.appendChild(system_clock_input_element);
 }

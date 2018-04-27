@@ -24,3 +24,7 @@
 input {
   margin: 5px 0 !important;
 }
+
+select {
+  margin: 5px 0 !important;
+}
