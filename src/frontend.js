@@ -87,7 +87,7 @@ function execute_timer_application() {
   var is_external_clock = document.getElementById("timer_application_is_external_clock").checked;
   var timer_module_name = document.getElementById("timer_application_timer_module").value;
 
-  var result = executeTimerOverflow(mcu_name, overflow_frequency, system_clock, timer_module_name);
+  var result = executeTimerOverflow(mcu_name, overflow_frequency, system_clock, is_external_clock, timer_module_name);
 
   $("#timer_result_placeholder, #timer_result_success, #timer_result_failure, #timer_result_timer_interrupt_code_div").hide();
 
@@ -97,10 +97,19 @@ function execute_timer_application() {
     document.getElementById("timer_result_timer_module").innerHTML = result.timer_module.name;
     document.getElementById("timer_result_timer_clock_source").innerHTML = "SYSCLK / " + result.timer_clock_source;
     document.getElementById("timer_result_timer_mode").innerHTML = result.timer_mode;
+    if (result.result_divisor > 1 || is_external_clock) {
+      document.getElementById("timer_result_placeholder").innerHTML = result.message;
+      $("#timer_result_placeholder").show();
+    }
     // TODO(bgobolos): code generation with external system clock is not supported.
     if (!is_external_clock) {
       document.getElementById("timer_result_timer_interrupt_code").innerHTML = get_timer_code(result);
       $("#timer_result_timer_interrupt_code_div").show();
+    } else {
+      if (result.result_divisor > 1) {
+        document.getElementById("timer_result_timer_interrupt_code").innerHTML = get_timer_interrupt_code(result);
+        $("#timer_result_timer_interrupt_code_div").show();
+      }
     }
 
     $("#timer_result_success").show();

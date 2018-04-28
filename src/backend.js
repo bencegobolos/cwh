@@ -1,4 +1,4 @@
-function executeTimerOverflow(mcu_name, overflow_frequency, sysclk, timer_module_name) {
+function executeTimerOverflow(mcu_name, overflow_frequency, sysclk, is_external_clock, timer_module_name) {
   /* Executes the algorithm. Returns the optimal setting of MCU.
    Returns: [result_reload_value, result_sysclk, result_timer_clock_source, result_timer_module, result_timer_mode]
    */
@@ -63,7 +63,13 @@ function executeTimerOverflow(mcu_name, overflow_frequency, sysclk, timer_module
     if (sysclk != -1 && timer_module_name !== "") result_settings.message += " with " + timer_module_name + " module and " + sysclk + " Hz system clock.";
   } else {
     result_settings = _.max(_.first(_.toArray(_.groupBy(results, "result_divisor"))), "result_goodness");
-    result_settings.message = "Timer application succeeded.";
+    result_settings.message = "";
+    if (result_settings.result_divisor > 1) {
+      result_settings.message += "The timer counter have to be extended by software in the interrupt handler. ";
+    }
+    if (is_external_clock) {
+      result_settings.message += "Code generation for external oscillator is not supported.";
+    }
   }
 
   return result_settings;
