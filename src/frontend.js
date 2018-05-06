@@ -154,9 +154,10 @@ function execute_adc_application() {
   var mcu_name = "C8051F410";
   var R = document.getElementById("adc_r_ext").value;
   var system_clock = document.getElementById("adc_application_system_clock").value;
+  var is_external_clock = document.getElementById("adc_application_is_external_clock").checked;
   var max_sampling_time = (1 / document.getElementById("adc_max_sampling_frequency").value);
 
-  var result = calculateAdc(mcu_name, system_clock, R, max_sampling_time);
+  var result = calculateAdc(mcu_name, system_clock, is_external_clock, R, max_sampling_time);
 
   $("#adc_result_placeholder, #adc_result_success, #adc_result_failure").hide();
 

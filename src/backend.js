@@ -152,7 +152,7 @@ function calculateUART(mcu_name, bit_per_sec, sysclk, is_external_clock, accurac
   bit_per_sec = parseInt(bit_per_sec);
   accuracy = parseInt(accuracy);
 
-  var result_settings = executeTimerOverflow(mcu.name, bit_per_sec*2, sysclk, "Timer1");
+  var result_settings = executeTimerOverflow(mcu.name, bit_per_sec*2, sysclk, is_external_clock, TIMER1);
   result_settings.bit_per_sec = calculateRealFrequency(result_settings.result_reload_value, result_settings.system_clock, result_settings.timer_clock_source, result_settings.timer_mode) / 2;
   result_settings.accuracy = Math.abs((result_settings.bit_per_sec - bit_per_sec) / (result_settings.bit_per_sec + bit_per_sec)) * 100;
 
@@ -206,7 +206,7 @@ function calculateRealFrequency(reload_value, sysclk, timer_clock_source, timer_
  SAR clock cycles plus an additional 2 FCLK cycles to start and complete a conversion.
  */
 
-function calculateAdc(mcu_name, sysclk, R, max_sampling_time) {
+function calculateAdc(mcu_name, sysclk, is_external_clock, R, max_sampling_time) {
 
   var minimum_tracking_time = (R / 1000) * 0.00000011 + 0.00000054;
   var sar_multipliers = [2, 4, 8, 16];
@@ -236,7 +236,7 @@ function calculateAdc(mcu_name, sysclk, R, max_sampling_time) {
       var post_tracking_time = getPostTrackingTime(system_clock, sar_clock, sar_multiplier);
       var ptt_plus_conv_time = post_tracking_time + conversion_time;
       // Calculate timer2 usage to drive the ADC module with 10% idling time after conversion (post tracking mode).
-      var timer_result = executeTimerOverflow(mcu_name, Math.floor(1/(ptt_plus_conv_time))*0.9, system_clock, TIMER2);
+      var timer_result = executeTimerOverflow(mcu_name, Math.floor(1/(ptt_plus_conv_time))*0.9, system_clock, is_external_clock, TIMER2);
       timer_result.result_frequency = calculateRealFrequency(timer_result.result_reload_value, timer_result.system_clock, timer_result.timer_clock_source,timer_result.timer_mode);
 
       var idle_time = 1/timer_result.result_frequency - ptt_plus_conv_time;
