@@ -154,7 +154,7 @@ function calculateUART(mcu_name, bit_per_sec, sysclk, is_external_clock, accurac
 
   var result_settings = executeTimerOverflow(mcu.name, bit_per_sec*2, sysclk, is_external_clock, TIMER1);
   result_settings.bit_per_sec = calculateRealFrequency(result_settings.result_reload_value, result_settings.system_clock, result_settings.timer_clock_source, result_settings.timer_mode) / 2;
-  result_settings.accuracy = Math.abs((result_settings.bit_per_sec - bit_per_sec) / (result_settings.bit_per_sec + bit_per_sec)) * 100;
+  result_settings.accuracy = Math.abs((bit_per_sec - result_settings.bit_per_sec) / bit_per_sec) * 100;
 
   if (result_settings.system_clock === undefined || result_settings.result_divisor > 1 || result_settings.accuracy > accuracy) {
     /* Workaround: if the result_divisor is bigger than 1, then the result is bad and have to
