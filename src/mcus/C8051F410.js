@@ -51,7 +51,9 @@ var Timer3 = {
 };
 
 var ADC = {
-  name : "ADC"
+  name : "ADC",
+  sar_multipliers : [2, 4, 8, 16],
+  max_sar_clock : 3000000
 };
 
 var C8051F410 = {
@@ -68,6 +70,17 @@ var C8051F410 = {
       }
     }
     // No timer module has been found with the name: timer_module_name.
+    return undefined;
+  },
+
+  getADCModule : function(adc_module_name) {
+    for (var x in this.adc_modules) {
+      var adc_module = this.adc_modules[x];
+      if (adc_module.name == adc_module_name) {
+        return adc_module;
+      }
+    }
+    // No adc module has been found with the name: timer_module_name.
     return undefined;
   }
 };

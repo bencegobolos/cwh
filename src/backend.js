@@ -208,9 +208,10 @@ function calculateRealFrequency(reload_value, sysclk, timer_clock_source, timer_
 
 function calculateAdc(mcu_name, sysclk, is_external_clock, R, max_sampling_time) {
 
-  var minimum_tracking_time = (R / 1000) * 0.00000011 + 0.00000054;
-  var sar_multipliers = [2, 4, 8, 16];
+  var minimum_tracking_time = (R / 1000) * 0.0000002 + 0.000001;
   var mcu = getMcu(mcu_list, mcu_name);
+  var adc_module = mcu.getADCModule("ADC");
+  var sar_multipliers = adc_module.sar_multipliers;
 
   // Optional parameters.
   var system_clocks;
@@ -228,7 +229,7 @@ function calculateAdc(mcu_name, sysclk, is_external_clock, R, max_sampling_time)
   for (var l = 0; l < system_clocks.length; ++l) {
     var system_clock = system_clocks[l];
     // TODO(bgobolos): if minimum tracking time is high (big resistance value) then slow down sar clock.
-    var AD0SC = getAD0SC(system_clock);
+    var AD0SC = getAD0SC(mcu_name, system_clock);
     var sar_clock = system_clock / (AD0SC + 1);
     var conversion_time = 13 * (1 / sar_clock) + 2 * (1/system_clock);
     for (var j = 0; j < sar_multipliers.length; ++j) {
@@ -281,15 +282,16 @@ function calculateAdc(mcu_name, sysclk, is_external_clock, R, max_sampling_time)
   return result_settings;
 }
 
-function getAD0SC(system_clock) {
+function getAD0SC(mcu_name, system_clock) {
   /*
    Get AD0SC register value.
    SAR has to be maximized but should not be greater than 3 MHz.
    If the system_clock is less then max_sar_clock, then the return value is always 0.
    */
-  var max_sar_clock = 3000000;
+  var mcu = getMcu(mcu_list, mcu_name);
+  var adc_module = mcu.getADCModule("ADC");
 
-  return Math.ceil(system_clock / max_sar_clock) - 1;
+  return Math.ceil(system_clock / adc_module.max_sar_clock) - 1;
 }
 
 function getPostTrackingTime(system_clock, sar_clock, sar_multiplier) {
